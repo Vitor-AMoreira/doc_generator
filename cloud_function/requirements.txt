@@ -1,0 +1,5 @@
+google-api-python-client==2.134.0
+google-auth==2.29.0
+google-auth-httplib2==0.2.0
+python-docx-template==0.10.0 # Ou a versão mais recente
+python-dateutil==2.9.0

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Documentos Médicos v4</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="form-panel">
+            <h1>Gerador de Documentos Médicos</h1>
+
+            <form id="medicalDocForm">
+                <fieldset class="form-section">
+                    <legend>Dados do Médico Solicitante</legend>
+                    <div class="form-grid">
+                        <label for="selectMedico">Médico Solicitante:</label>
+                        <select id="selectMedico" name="selectMedico">
+                            <option value="">Selecione um médico...</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Dados do Paciente</legend>
+                    <div class="form-grid patient-grid">
+                        <label for="pacProntuario">Prontuário:</label>
+                        <input type="text" id="pacProntuario" name="pacProntuario" class="span-2">
+                        <label for="pacNomeSocial">Nome:</label>
+                        <input type="text" id="pacNomeSocial" name="pacNomeSocial" class="span-3">
+                        <label for="pacSexo">Sexo:</label>
+                        <select id="pacSexo" name="pacSexo">
+                            <option value="">Selecione...</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Feminino">Feminino</option>
+                            <option value="Outro">Outro</option>
+                            <option value="Não informado">Não informado</option>
+                        </select>
+                        <label for="pacNomeMae">Nome da Mãe:</label>
+                        <input type="text" id="pacNomeMae" name="pacNomeMae" class="span-4">
+                        <label for="pacDataNascimento">Data de Nascimento:</label>
+                        <input type="date" id="pacDataNascimento" name="pacDataNascimento">
+                        <label for="pacCartaoSUS">Cartão SUS:</label>
+                        <input type="text" id="pacCartaoSUS" name="pacCartaoSUS" class="span-4">
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>Detalhes do Serviço e Documentos</legend>
+                    <div class="form-grid">
+                        <label for="servicoTipo">Tipo de Serviço:</label>
+                        <select id="servicoTipo" name="servicoTipo">
+                            <option value="">Selecione...</option>
+                            <option value="Cirurgia Cardíaca">Cirurgia Cardíaca</option>
+                            <option value="Eletrofisiologia">Eletrofisiologia</option>
+                            <option value="Marcapassos">Marcapassos</option>
+                        </select>
+                    </div>
+                    <div id="camposPersonalizadosContainer" class="form-grid-dynamic" style="margin-top: 15px;">
+                        </div>
+                </fieldset>
+
+                <div class="action-section">
+                    <button type="button" id="btnGerarUploadDocumento" class="primary-button">Gerar Documentos</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="preview-panel">
+            <h2>Status da Operação</h2>
+            <div id="statusMessages">
+                <p>Preencha o formulário e clique em gerar.</p>
+            </div>
+            <div id="outputLink" style="margin-top: 20px;">
+                </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
