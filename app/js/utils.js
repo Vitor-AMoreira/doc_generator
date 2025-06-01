@@ -16,17 +16,17 @@ export function obterDataAtualFormatada() {
     const hoje = new Date();
     return {
         dia: hoje.getDate().toString().padStart(2, '0'),
-        mes: (hoje.getMonth() + 1).toString().padStart(2, '0'),
+        mes: (hoje.getMonth() + 1).toString().padStart(2, '0'), // Meses são 0-indexados
         ano: hoje.getFullYear().toString(),
         completa: hoje.toLocaleDateString('pt-BR') // ex: 17/05/2025
     };
 }
 
-export function formatarDataParaTemplate(dataString) { // "YYYY-MM-DD"
+export function formatarDataParaTemplate(dataString) { // Espera "YYYY-MM-DD"
     if (!dataString) return "";
     const partes = dataString.split('-');
     if (partes.length === 3) {
-        return `<span class="math-inline">\{partes\[2\]\}/</span>{partes[1]}/${partes[0]}`; // DD/MM/YYYY
+        return `${partes[2]}/${partes[1]}/${partes[0]}`; // Formato DD/MM/YYYY
     }
     return dataString; // Retorna original se não estiver no formato esperado
 }

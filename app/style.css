@@ -1,34 +1,34 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0; /* Removido padding do body para o app-container controlar */
+    padding: 0;
     background-color: #f4f4f4;
     color: #333;
     line-height: 1.6;
-    display: flex; /* Para centralizar o app-container se necessário */
-    justify-content: center; /* Para centralizar o app-container */
+    display: flex;
+    justify-content: center;
 }
 
 .app-container {
     display: flex;
     width: 100%;
-    max-width: 1600px; /* Ajuste conforme necessário */
-    margin: 10px; /* Margem pequena ao redor */
+    max-width: 1600px;
+    margin: 10px;
     background: #fff;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    overflow: hidden; /* Para conter os painéis */
+    overflow: hidden;
 }
 
 .form-panel {
-    flex: 2; /* Formulário ocupa mais espaço */
+    flex: 2;
     padding: 25px;
-    overflow-y: auto; /* Scroll se o conteúdo for maior */
+    overflow-y: auto;
     border-right: 1px solid #ddd;
 }
 
 .preview-panel {
-    flex: 1; /* Painel de status/preview ocupa menos espaço */
+    flex: 1;
     padding: 25px;
     background-color: #f9f9f9;
     overflow-y: auto;
@@ -42,7 +42,12 @@ body {
 #statusMessages p {
     font-style: italic;
     color: #555;
+    margin: 5px 0;
 }
+.status-erro { color: #dc3545; font-weight: bold; }
+.status-sucesso { color: #28a745; font-weight: bold; }
+.status-info { color: #0056b3; }
+.status-aviso { color: #ffc107; font-weight: bold;}
 
 
 h1 {
@@ -80,6 +85,7 @@ h1 {
 label {
     font-weight: bold;
     display: block;
+    margin-bottom: 5px; 
 }
 
 input[type="text"],
@@ -94,6 +100,20 @@ textarea {
     font-size: 1em;
 }
 
+/* Ajuste para checkboxes terem label ao lado */
+.form-grid div.form-group input[type="checkbox"] {
+    width: auto; /* Para não ocupar 100% */
+    margin-right: 8px; /* Espaço entre checkbox e label */
+    vertical-align: middle;
+}
+
+.form-grid div.form-group label {
+    display: inline; /* Para alinhar com o checkbox */
+    font-weight: normal; /* Para não ficar negrito como as labels principais */
+    margin-bottom: 0;
+}
+
+
 textarea {
     resize: vertical;
 }
@@ -103,6 +123,77 @@ textarea {
 .span-4 { grid-column: span 4; }
 .span-full { grid-column: 1 / -1; }
 
+
+.form-grid-dynamic .form-group {
+    margin-bottom: 15px;
+}
+
+/* Estilos para o campo CID customizado */
+.custom-cid-dropdown {
+    position: relative; 
+}
+
+.custom-cid-trigger {
+    cursor: pointer;
+    background-color: #fff; 
+}
+
+.custom-cid-panel {
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    right: 0;
+    border: 1px solid #ccc;
+    background-color: white;
+    z-index: 1000; 
+    max-height: 300px; 
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 0 0 4px 4px;
+}
+
+.custom-cid-search {
+    width: calc(100% - 20px); 
+    padding: 8px 10px;
+    margin: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.custom-cid-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.custom-cid-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.custom-cid-list li:hover {
+    background-color: #f0f0f0;
+}
+
+.custom-cid-load-more {
+    display: block;
+    width: calc(100% - 10px);
+    margin: 5px;
+    padding: 8px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+}
+.custom-cid-load-more:hover {
+    background-color: #0056b3;
+}
+
+
 button {
     padding: 10px 18px;
     border: none;
@@ -110,16 +201,10 @@ button {
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s ease;
-    margin-right: 10px; /* Espaçamento entre botões */
+    margin-right: 10px;
 }
 button:last-child {
     margin-right: 0;
-}
-
-#google-auth-controls {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
 }
 
 .primary-button {
@@ -128,18 +213,11 @@ button:last-child {
 }
 .primary-button:hover { background-color: #218838; }
 
-.secondary-button { /* Reutilizado para botões do Google ou outros */
+.secondary-button {
     background-color: #007bff;
     color: white;
 }
 .secondary-button:hover { background-color: #0056b3; }
-
-#signout_button {
-    background-color: #dc3545;
-}
-#signout_button:hover {
-    background-color: #c82333;
-}
 
 
 .action-section {
@@ -147,7 +225,6 @@ button:last-child {
     margin-top: 20px;
 }
 
-/* Ajustes para telas menores */
 @media (max-width: 900px) {
     .app-container {
         flex-direction: column;
@@ -155,9 +232,9 @@ button:last-child {
         border-radius: 0;
     }
     .form-panel, .preview-panel {
-        flex: 1; /* Ocupam a largura total */
+        flex: 1;
         border-right: none;
-        border-bottom: 1px solid #ddd; /* Borda entre painéis na vertical */
+        border-bottom: 1px solid #ddd;
     }
     .preview-panel {
         border-bottom: none;
@@ -165,10 +242,13 @@ button:last-child {
     .form-grid, .patient-grid {
         grid-template-columns: 1fr;
     }
-    .span-2, .span-3, .span-full {
-        grid-column: auto;
+    .span-2, .span-3, .span-4, .span-full {
+        grid-column: 1 / -1;
     }
     .action-section {
         text-align: center;
+    }
+    .custom-cid-panel { 
+        max-height: 200px; 
     }
 }
