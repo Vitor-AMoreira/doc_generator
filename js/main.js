@@ -49,7 +49,7 @@ async function chamarCloudFunctionGerarDocumento() {
 
     exibirMensagemStatus(JSON.stringify(dadosForm, null, 2), 'info');
 
-    if (CLOUD_FUNCTION_URL === 'https://southamerica-east1-jesus-doc-generator.cloudfunctions.net/doc_generator') {
+    if (CLOUD_FUNCTION_URL === 'SUA_CLOUD_FUNCTION_URL_AQUI/gerar-documento') {
         exibirMensagemStatus('ERRO: URL da Cloud Function não configurada em js/config.js.', 'erro');
         return;
     }

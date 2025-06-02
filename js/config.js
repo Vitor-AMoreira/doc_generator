@@ -2,7 +2,7 @@
 export const CHAVE_MEDICO_SELECIONADO = 'medicalDocApp_selectedDoctorId_v6';
 
 // *** IMPORTANTE: URL da sua Cloud Function ***
-export const CLOUD_FUNCTION_URL = 'SUA_CLOUD_FUNCTION_URL_AQUI/gerar-documento'; // Substitua pela sua URL real
+export const CLOUD_FUNCTION_URL = 'https://southamerica-east1-jesus-doc-generator.cloudfunctions.net/doc_generator'; // Substitua pela sua URL real
 
 // Caminho para o arquivo CSV dos CIDs
 export const CID_CSV_PATH = 'cid.csv';
