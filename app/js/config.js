@@ -15,46 +15,71 @@ export const MEDICOS = [
 ];
 
 // Cirurgiões para seleção em campos específicos (ex: Aviso Eletivo)
-export const CIRURGIOES_AUXILIARES = [
-    { id: 'luiz_antonio_aux', name: "Luiz Antonio", crm: "6873" },
-    { id: 'guilherme_brasil_aux', name: "Guilherme Brasil", crm: "29479" },
-    { id: 'marcos_vargas_aux', name: "Marcos Vargas Aleixo", crm: "5745" }
+export const CIRURGIOES = [
+    { id: 'luiz_antonio', name: "Luiz Antonio", crm: "6873" },
+    { id: 'guilherme_brasil', name: "Guilherme Brasil", crm: "29479" },
+    { id: 'marcos_vargas', name: "Marcos Vargas Aleixo", crm: "5745" }
 ];
 
+const INSTRUMENTAL_MATERIAIS_BASE_MARCAPASSO_CDI = {
+    pre_operatorio: "",
+    empresa_consignados: "",
+    fios_cirurgicos: "",
+    // Equipamentos específicos para Marcapasso (vazios conforme solicitado)
+    bist_eletrico: "",
+    torre_video: "",
+    ultrassom: "",
+    tca: "",
+    eco_trans: ""
+    // Os demais placeholders (bist_argonio, escopia, mic_olympus, mic_zeiss, mic_leica) não estão na imagem, então não são adicionados aqui.
+};
+
 const INSTRUMENTAL_MATERIAIS_MP_DDD = {
-    instrumental: "CAIXA DE MARCA-PASSO DDD ; FIOS DE NYLON; CAIXA DE MARCA-PASSO; GERADOR DE MARCA-PASSO DDD (COMUNICAR PROGRAMADOR – BOSTON - PROPONENT MRI)",
-    materiais: "CAIXA DE MARCA-PASSO DDD ; FIOS DE NYLON; CAIXA DE MARCA-PASSO; GERADOR DE MARCA-PASSO DDD (COMUNICAR PROGRAMADOR – BOSTON - PROPONENT MRI)"
+    ...INSTRUMENTAL_MATERIAIS_BASE_MARCAPASSO_CDI,
+    instrumental_cirurgico: "CAIXA DE MARCA-PASSO DDD ; FIOS DE NYLON; CAIXA DE MARCA-PASSO; GERADOR DE MARCA-PASSO DDD (COMUNICAR PROGRAMADOR – BOSTON - PROPONENT MRI)",
+    materiais_consignados: "CAIXA DE MARCA-PASSO DDD ; FIOS DE NYLON; CAIXA DE MARCA-PASSO; GERADOR DE MARCA-PASSO DDD (COMUNICAR PROGRAMADOR – BOSTON - PROPONENT MRI)"
 };
 
 const INSTRUMENTAL_MATERIAIS_CDI_MULTISSITIO = {
-    instrumental: "CAIXA DE MARCA-PASSO MULTISSÍTIO; FIOS DE NYLON; GERADOR DE CDI DDD (CAMERA DUPLA) (COMUNICAR PROGRAMADOR_)",
-    materiais: "CAIXA DE MARCA-PASSO MULTISSÍTIO; FIOS DE NYLON; GERADOR DE CDI DDD (CAMERA DUPLA) (COMUNICAR PROGRAMADOR_)"
+    ...INSTRUMENTAL_MATERIAIS_BASE_MARCAPASSO_CDI,
+    instrumental_cirurgico: "CAIXA DE MARCA-PASSO MULTISSÍTIO; FIOS DE NYLON; GERADOR DE CDI DDD (CAMERA DUPLA) (COMUNICAR PROGRAMADOR_)",
+    materiais_consignados: "CAIXA DE MARCA-PASSO MULTISSÍTIO; FIOS DE NYLON; GERADOR DE CDI DDD (CAMERA DUPLA) (COMUNICAR PROGRAMADOR_)"
+};
+
+export const INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA = {
+    pre_operatorio: "TOMAR BANHO COM CLOREXIDINE DEGERMANTE, DEPILAÇÃO DO TÓRAX, ABDOME E MEMBROS INFERIORES",
+    instrumental_cirurgico: "CAIXA DA CIRURGIA CARDIOVASCULAR / CAIXAS DE COMPLEMENTO DE VÁLVULA / CAIXA DE CONECTORES PARA CEC / CAIXA DE PASSADORES DE FIO / KIT DE CIRCULAÇÃO EXTRACORPÓREA ADULTO / CÂNULAS DE AORTA E VEIA CAVA CURVA ARAMADAS / PATCH DE PERICÁRDIO BOVINO / PATCH INORGÂNICO / SURGICEL / GELFOAM / COLA CIRÚRGICA CARDIOVASCULAR (10 UNIDADES) / MANTA TÉRMICA / DRENO DE TÓRAX TUBULAR Nº 36 + COLETOR SELO D' ÁGUA (03 UNIDADES) / BISTURI LÂMINAS Nº 11, 15, 23 / JELCO Nº 14 (03 UNIDADES) / PRÓTESES DE VÁLVULA AÓRTICA MECÂNICA E BIOLÓGICA Nº  19, 21, 23, 25, 27 / PRÓTESES DE VÁLVULA MITRAL MECÂNICA E BIOLÓGICA Nº 25, 27, 29, 31, 33 /  CLOREXIDINE DEGERMANTE (1 LITRO) E CLOREXIDINE ALCOÓLICO (1 LITRO) / FIO VERMELHO E PRETO PARA MARCAPASSO EXTERNO /  CATETER VENOSO CENTRAL DUPLO LÚMEN / KIT DE BALÃO INTRA-AÓRTICO / SONDA VESICAL  Nº 12, 14, 16 + COLETOR / PÁS DE DESFIBRILADOR INTERNO ADULTO/ PLACAS ADESIVAS PARA DESFIBRILADOR EXTERNO / MARCAPASSO EXTERNO / COMPRESSAS ESTÉREIS / KIT PARA DEGERMAÇÃO / KIT SONDAGEM VESICAL / COXIM PARA TÓRAX / SCALP Nº 23 (02 UNIDADES) / ",
+    materiais_consignados: "NÃO",
+    empresa_consignados: "NÃO",
+    fios_cirurgicos: "NYLON (3-0 / 4-0) - 10 UNIDADES DE CADA NÚMERO / ALGODÃO NÃO-AGULHADO (2-0 / 4-0) - 5 UNIDADES DE CADA NÚMERO / ALGODÃO AGULHADO (2-0) 10 UNIDADES / POLIPROPILENO (PROLENE) (3-0 / 4-0 / 5-0 / 6-0 / 7-0) - 10 UNIDADES DE CADA NÚMERO / POLIGLACTINA (VICRYL) (0 / 2-0 / 3-0) - 10 UNIDADES DE CADA NÚMERO / POLIÉSTER (ETHIBOND) COM ALMOFADA DE TEFLON (2-0) - 60 UNIDADES / FIO DE AÇO Nº 5 - 10 UNIDADES / FIO DE MARCAPASSO PROVISÓRIO - 02 UNIDADES / FITA CARDÍACA - 04 UNIDADES / POLIGLACTINA INCOLOR (VICRYL) (3-0) 10 UNIDADES",
+    bist_eletrico: "X",
+    torre_video: "X",
+    ultrassom: "X",
+    tca: "X",
+    eco_trans: "X"
+    // Os demais placeholders (bist_argonio, escopia, mic_olympus, mic_zeiss, mic_leica) não estão na imagem, então não são incluídos.
 };
 
 export const OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO = [
     {
         id: "implante_marcapasso_ddd",
         name: "Implante de marcapasso DDD",
-        instrumental: INSTRUMENTAL_MATERIAIS_MP_DDD.instrumental,
-        materiais: INSTRUMENTAL_MATERIAIS_MP_DDD.materiais
+        ...INSTRUMENTAL_MATERIAIS_MP_DDD
     },
     {
         id: "troca_gerador_marcapasso_ddd",
         name: "Troca de gerador marcapasso DDD",
-        instrumental: INSTRUMENTAL_MATERIAIS_MP_DDD.instrumental,
-        materiais: INSTRUMENTAL_MATERIAIS_MP_DDD.materiais
+        ...INSTRUMENTAL_MATERIAIS_MP_DDD
     },
     {
         id: "implante_cdi_multissitio",
         name: "Implante de CDI multissitio",
-        instrumental: INSTRUMENTAL_MATERIAIS_CDI_MULTISSITIO.instrumental,
-        materiais: INSTRUMENTAL_MATERIAIS_CDI_MULTISSITIO.materiais
+        ...INSTRUMENTAL_MATERIAIS_CDI_MULTISSITIO
     },
     {
         id: "troca_gerador_cdi_multissitio",
         name: "Troca de gerador de CDI multissitio",
-        instrumental: INSTRUMENTAL_MATERIAIS_CDI_MULTISSITIO.instrumental,
-        materiais: INSTRUMENTAL_MATERIAIS_CDI_MULTISSITIO.materiais
+        ...INSTRUMENTAL_MATERIAIS_CDI_MULTISSITIO
     }
 ];
 
@@ -106,9 +131,9 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         },
         {
             id: "cirurgiao_aviso_eletivo_mp",
-            label: "Cirurgião Principal:",
+            label: "Cirurgião:",
             tipo: "select",
-            opcoes_dropdown: CIRURGIOES_AUXILIARES,
+            opcoes_dropdown: CIRURGIOES,
             placeholder_template_nome: "nome_cirurgiao",
             placeholder_template_crm: "crm_cirurgiao"
         }
@@ -142,7 +167,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             id: "cirurgiao_aviso_eletivo_cc",
             label: "Cirurgião:",
             tipo: "select",
-            opcoes_dropdown: CIRURGIOES_AUXILIARES,
+            opcoes_dropdown: CIRURGIOES,
             placeholder_template_nome: "nome_cirurgiao",
             placeholder_template_crm: "crm_cirurgiao"
         }
@@ -160,12 +185,11 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             tipo: "date",
             placeholder_template: "data_cirurgia"
         },
-        { 
-            id: "cid_selecionado_ef", // ID base para o campo CID customizado
+        {
+            id: "cid_selecionado_ef",
             label: "CID:",
-            tipo: "cid_custom_select", // Novo tipo para o componente customizado
-            // Os placeholders serão usados para nomear os inputs hidden que guardarão os valores finais
-            placeholder_template_codigo: "codigo_cid", 
+            tipo: "cid_custom_select",
+            placeholder_template_codigo: "codigo_cid",
             placeholder_template_descricao: "descricao_cid"
         },
         {
@@ -179,7 +203,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             id: "cirurgiao_aviso_eletivo_ef",
             label: "Cirurgião:",
             tipo: "select",
-            opcoes_dropdown: CIRURGIOES_AUXILIARES,
+            opcoes_dropdown: CIRURGIOES,
             placeholder_template_nome: "nome_cirurgiao",
             placeholder_template_crm: "crm_cirurgiao"
         }
@@ -199,7 +223,6 @@ export const FORM_ELEMENT_IDS = {
     pacCartaoSUS: "pacCartaoSUS",
     statusMessages: "statusMessages",
     outputLink: "outputLink",
-    // Sufixos para elementos do CID customizado (o ID base virá de campoConfig.id)
     cidCustomTriggerSuffix: "_trigger",
     cidCustomPanelSuffix: "_panel",
     cidCustomSearchSuffix: "_search",

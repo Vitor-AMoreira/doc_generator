@@ -19,18 +19,18 @@ ID_PASTA_RAIZ_GERADOR_FIXO = "1uBlptVoSpPCqWkKKZB7wyyVq--tsJ1nf"
 
 DOCUMENTOS_POR_SERVICO = {
     "Marcapassos": [
-        {"nome_documento_logico": "Priorizacao_Marcapasso", "template_id": "1lD1VC6g2KlyWYB0nQOBWgevSqOAfQfwea3Bojnek06c"},
-        {"nome_documento_logico": "Aviso_Eletivo_Marcapasso", "template_id": "16QJzBhnHMYuifNk7gotMshQPRbDos-hB7_1DauoIa0U"}
+        {"nome_documento_logico": "Priorizacao_Marcapasso", "template_id": "1NpRDSnzqvarzjF_H2Ykg1hpxI61az-SiD4OUCnaPkvQ"},
+        {"nome_documento_logico": "Aviso_Eletivo_Marcapasso", "template_id": "1mT8_xHTuuMn1uKkVae2_c8cH41PSavFuleqKLE6WxhE"}
     ],
     "Eletrofisiologia": [
         {"nome_documento_logico": "Lista_Material_Eletrofisiologia", "template_id": "1hSWY4TztveMj6Y7cduW_YBGg2FIRq5tM204RsH_oiQw"},
         {"nome_documento_logico": "Aviso_Hemodinamica_Eletrofisiologia", "template_id": "1AINdqy0i2YB-9p5zlLbbleqSVSKSjq0iY6RZTSv5IW4"},
-        {"nome_documento_logico": "Priorizacao_Eletrofisiologia", "template_id": "1lD1VC6g2KlyWYB0nQOBWgevSqOAfQfwea3Bojnek06c"}
+        {"nome_documento_logico": "Priorizacao_Eletrofisiologia", "template_id": "1NpRDSnzqvarzjF_H2Ykg1hpxI61az-SiD4OUCnaPkvQ"}
     ],
     "Cirurgia Cardíaca": [
         {"nome_documento_logico": "Aviso_Hemodinamica_Cirurgia_Cardiaca", "template_id": "1AINdqy0i2YB-9p5zlLbbleqSVSKSjq0iY6RZTSv5IW4"},
-        {"nome_documento_logico": "Priorizacao_Cirurgia_Cardiaca", "template_id": "1lD1VC6g2KlyWYB0nQOBWgevSqOAfQfwea3Bojnek06c"},
-        {"nome_documento_logico": "Aviso_Eletivo_Cirurgia_Cardiaca", "template_id": "16QJzBhnHMYuifNk7gotMshQPRbDos-hB7_1DauoIa0U"}
+        {"nome_documento_logico": "Priorizacao_Cirurgia_Cardiaca", "template_id": "1NpRDSnzqvarzjF_H2Ykg1hpxI61az-SiD4OUCnaPkvQ"},
+        {"nome_documento_logico": "Aviso_Eletivo_Cirurgia_Cardiaca", "template_id": "1mT8_xHTuuMn1uKkVae2_c8cH41PSavFuleqKLE6WxhE"}
     ]
 }
 _id_pasta_raiz_gerador_cache = ID_PASTA_RAIZ_GERADOR_FIXO
@@ -245,38 +245,41 @@ if __name__ == '__main__':
         # Mock de dados de formulário para teste, similar ao fornecido na pergunta
         mock_form_data_teste_eletrofisiologia = {
             "medico": {
-                "id": "doc001",
-                "name": "Dra. Helena Campos",
-                "crm": "12345GO",
-                "cpf": "111.222.333-44"
+                "id": "2",
+                "name": "Thaine Inacio Mendonça",
+                "crm": "27066",
+                "cpf": "70114148198"
             },
             "paciente": {
-                "prontuario": "P00789EF",
-                "nome_social": "Carlos Alberto Nobrega",
-                "sexo": "Masculino",
-                "nome_mae": "Maria Aparecida Nobrega",
-                "data_nascimento": "1975-03-15",
-                "cartao_sus": "899123456780001"
+                "prontuario": "dbghdrse",
+                "nome_social": "zdthdx",
+                "sexo": "",
+                "nome_mae": "rstghf",
+                "data_nascimento": "",
+                "cartao_sus": "rdthgf"
             },
             "servico": {
-                "tipo": "Eletrofisiologia"
+                "tipo": "Cirurgia Cardíaca"
             },
             "campos_dinamicos": {
-                "condicao_clinica": "Paciente relata palpitações frequentes e episódios de síncope. Suspeita de taquiarritmia ventricular. Necessário estudo eletrofisiológico para diagnóstico e possível ablação.",
-                "data_cirurgia": "2025-07-25",
-                "codigo_cid": "I47.2",
-                "descricao_cid": "Taquicardia ventricular",
-                "cirurgia_proposta": "Estudo Eletrofisiológico com Ablação por Radiofrequência",
-                "procedimento": "ESTUDO ELETROFISIOLOGICO TERAPEUTICO II",
-                "procedimento_codigo": "04.06.05.012-0",
-                "nome_cirurgiao": "Dr. Ricardo Arritmologista",
-                "crm_cirurgiao": "98765SP",
+                "condicao_clinica": "srthg",
+                "data_cirurgia": "",
+                "diagnostico": "rdtfhx",
+                "cirurgia_proposta": "srthfg",
+                "nome_cirurgiao": "Luiz Antonio",
+                "crm_cirurgiao": "6873",
+                "pre_operatorio": "TOMAR BANHO COM CLOREXIDINE DEGERMANTE, DEPILAÇÃO DO TÓRAX, ABDOME E MEMBROS INFERIORES",
+                "instrumental_cirurgico": "CAIXA DA CIRURGIA CARDIOVASCULAR / CAIXAS DE COMPLEMENTO DE VÁLVULA / CAIXA DE CONECTORES PARA CEC / CAIXA DE PASSADORES DE FIO / KIT DE CIRCULAÇÃO EXTRACORPÓREA ADULTO / CÂNULAS DE AORTA E VEIA CAVA CURVA ARAMADAS / PATCH DE PERICÁRDIO BOVINO / PATCH INORGÂNICO / SURGICEL / GELFOAM / COLA CIRÚRGICA CARDIOVASCULAR (10 UNIDADES) / MANTA TÉRMICA / DRENO DE TÓRAX TUBULAR Nº 36 + COLETOR SELO D' ÁGUA (03 UNIDADES) / BISTURI LÂMINAS Nº 11, 15, 23 / JELCO Nº 14 (03 UNIDADES) / PRÓTESES DE VÁLVULA AÓRTICA MECÂNICA E BIOLÓGICA Nº  19, 21, 23, 25, 27 / PRÓTESES DE VÁLVULA MITRAL MECÂNICA E BIOLÓGICA Nº 25, 27, 29, 31, 33 /  CLOREXIDINE DEGERMANTE (1 LITRO) E CLOREXIDINE ALCOÓLICO (1 LITRO) / FIO VERMELHO E PRETO PARA MARCAPASSO EXTERNO /  CATETER VENOSO CENTRAL DUPLO LÚMEN / KIT DE BALÃO INTRA-AÓRTICO / SONDA VESICAL  Nº 12, 14, 16 + COLETOR / PÁS DE DESFIBRILADOR INTERNO ADULTO/ PLACAS ADESIVAS PARA DESFIBRILADOR EXTERNO / MARCAPASSO EXTERNO / COMPRESSAS ESTÉREIS / KIT PARA DEGERMAÇÃO / KIT SONDAGEM VESICAL / COXIM PARA TÓRAX / SCALP Nº 23 (02 UNIDADES) / ",
+                "materiais_consignados": "NÃO",
+                "empresa_consignados": "NÃO",
+                "fios_cirurgicos": "NYLON (3-0 / 4-0) - 10 UNIDADES DE CADA NÚMERO / ALGODÃO NÃO-AGULHADO (2-0 / 4-0) - 5 UNIDADES DE CADA NÚMERO / ALGODÃO AGULHADO (2-0) 10 UNIDADES / POLIPROPILENO (PROLENE) (3-0 / 4-0 / 5-0 / 6-0 / 7-0) - 10 UNIDADES DE CADA NÚMERO / POLIGLACTINA (VICRYL) (0 / 2-0 / 3-0) - 10 UNIDADES DE CADA NÚMERO / POLIÉSTER (ETHIBOND) COM ALMOFADA DE TEFLON (2-0) - 60 UNIDADES / FIO DE AÇO Nº 5 - 10 UNIDADES / FIO DE MARCAPASSO PROVISÓRIO - 02 UNIDADES / FITA CARDÍACA - 04 UNIDADES / POLIGLACTINA INCOLOR (VICRYL) (3-0) 10 UNIDADES",
+                "bist_eletrico": "X",
+                "torre_video": "X",
+                "ultrassom": "X",
+                "tca": "X",
+                "eco_trans": "X"
             },
-            "pedidos_exames": [
-                "Ecocardiograma Transtorácico Recente",
-                "Holter 24 horas",
-                "Exames laboratoriais (Coagulograma, Função Renal, Eletrólitos)"
-            ]
+            "pedidos_exames": []
         }
 
         mock_form_data_teste = mock_form_data_teste_eletrofisiologia

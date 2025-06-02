@@ -5,14 +5,15 @@ import {
     FORM_ELEMENT_IDS,
     OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA,
     OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO,
-    CIRURGIOES_AUXILIARES,
+    CIRURGIOES,
     CID_CSV_PATH,
-    CIDS_PER_PAGE
+    CIDS_PER_PAGE,
+    INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA
 } from './config.js';
 
-let cidDataGlobal = []; 
-let currentCIDPage = 1; 
-let currentCIDSearchTerm = ""; 
+let cidDataGlobal = [];
+let currentCIDPage = 1;
+let currentCIDSearchTerm = "";
 
 const DOMElements = {
     selectMedico: document.getElementById(FORM_ELEMENT_IDS.selectMedico),
@@ -32,7 +33,7 @@ export async function carregarDadosCID() {
         }
         const csvText = await response.text();
         const lines = csvText.split('\n').filter(line => line.trim() !== '');
-        
+
         cidDataGlobal = lines.slice(1).map(line => {
             const parts = line.split(';');
             if (parts.length >= 2) {
@@ -67,26 +68,26 @@ function criarCampoCIDCustomizado(container, campoConfig) {
     triggerInput.type = 'text';
     triggerInput.id = baseId + FORM_ELEMENT_IDS.cidCustomTriggerSuffix;
     triggerInput.placeholder = 'Selecione o CID...';
-    triggerInput.readOnly = true; 
+    triggerInput.readOnly = true;
     triggerInput.className = 'custom-cid-trigger';
     divCampo.appendChild(triggerInput);
 
     const hiddenCodeInput = document.createElement('input');
     hiddenCodeInput.type = 'hidden';
     hiddenCodeInput.id = baseId + FORM_ELEMENT_IDS.cidCustomHiddenCodeSuffix;
-    hiddenCodeInput.name = campoConfig.placeholder_template_codigo; 
+    hiddenCodeInput.name = campoConfig.placeholder_template_codigo;
     divCampo.appendChild(hiddenCodeInput);
 
     const hiddenDescriptionInput = document.createElement('input');
     hiddenDescriptionInput.type = 'hidden';
     hiddenDescriptionInput.id = baseId + FORM_ELEMENT_IDS.cidCustomHiddenDescriptionSuffix;
-    hiddenDescriptionInput.name = campoConfig.placeholder_template_descricao; 
+    hiddenDescriptionInput.name = campoConfig.placeholder_template_descricao;
     divCampo.appendChild(hiddenDescriptionInput);
 
     const panel = document.createElement('div');
     panel.id = baseId + FORM_ELEMENT_IDS.cidCustomPanelSuffix;
     panel.className = 'custom-cid-panel';
-    panel.style.display = 'none'; 
+    panel.style.display = 'none';
 
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
@@ -101,12 +102,12 @@ function criarCampoCIDCustomizado(container, campoConfig) {
     panel.appendChild(listElement);
 
     const loadMoreButton = document.createElement('button');
-    loadMoreButton.type = 'button'; 
+    loadMoreButton.type = 'button';
     loadMoreButton.id = baseId + FORM_ELEMENT_IDS.cidCustomLoadMoreSuffix;
     loadMoreButton.textContent = 'Carregar mais CIDs';
     loadMoreButton.className = 'custom-cid-load-more';
     panel.appendChild(loadMoreButton);
-    
+
     divCampo.appendChild(panel);
     container.appendChild(divCampo);
 
@@ -117,8 +118,8 @@ function criarCampoCIDCustomizado(container, campoConfig) {
         }
 
         const searchTermLowerCase = currentCIDSearchTerm.toLowerCase();
-        const filteredCIDs = cidDataGlobal.filter(cid => 
-            cid.description.toLowerCase().includes(searchTermLowerCase) || 
+        const filteredCIDs = cidDataGlobal.filter(cid =>
+            cid.description.toLowerCase().includes(searchTermLowerCase) ||
             cid.code.toLowerCase().includes(searchTermLowerCase)
         );
 
@@ -146,20 +147,20 @@ function criarCampoCIDCustomizado(container, campoConfig) {
     triggerInput.addEventListener('click', () => {
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         if (panel.style.display === 'block' && listElement.children.length === 0) {
-            currentCIDSearchTerm = ""; 
+            currentCIDSearchTerm = "";
             searchInput.value = "";
-            renderCIDItems(true); 
+            renderCIDItems(true);
         }
     });
 
     searchInput.addEventListener('input', () => {
         currentCIDSearchTerm = searchInput.value;
-        renderCIDItems(true); 
+        renderCIDItems(true);
     });
 
     loadMoreButton.addEventListener('click', () => {
         currentCIDPage++;
-        renderCIDItems(false); 
+        renderCIDItems(false);
     });
 
     document.addEventListener('click', (event) => {
@@ -243,7 +244,7 @@ export function atualizarCamposPersonalizados() {
                     inputElement.type = campoConfig.tipo;
                 }
                 inputElement.id = campoConfig.id;
-                inputElement.name = campoConfig.id; 
+                inputElement.name = campoConfig.id;
 
                 divCampo.appendChild(inputElement);
                 DOMElements.containerCamposPersonalizados.appendChild(divCampo);
@@ -259,7 +260,7 @@ export function coletarDadosDoFormulario() {
         paciente: {},
         servico: {},
         campos_dinamicos: {},
-        pedidos_exames: [] // Novo campo para os exames
+        pedidos_exames: []
     };
 
     const idMedicoSelecionado = DOMElements.selectMedico?.value;
@@ -283,7 +284,7 @@ export function coletarDadosDoFormulario() {
             if (campoConfig.tipo === "cid_custom_select") {
                 const hiddenCodeInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenCodeSuffix);
                 const hiddenDescriptionInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenDescriptionSuffix);
-                
+
                 if (hiddenCodeInput && campoConfig.placeholder_template_codigo) {
                     dados.campos_dinamicos[campoConfig.placeholder_template_codigo] = hiddenCodeInput.value;
                 }
@@ -309,19 +310,25 @@ export function coletarDadosDoFormulario() {
                         const selectedCirurgiaId = value;
                         const cirurgiaSelecionadaObj = OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO.find(c => c.id === selectedCirurgiaId);
                         if (cirurgiaSelecionadaObj) {
-                            dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionadaObj.name;
-                            if (cirurgiaSelecionadaObj.instrumental) {
-                                dados.campos_dinamicos.instrumental_cirurgico_aviso = cirurgiaSelecionadaObj.instrumental;
-                            }
-                            if (cirurgiaSelecionadaObj.materiais) {
-                                dados.campos_dinamicos.materiais_consignados_aviso = cirurgiaSelecionadaObj.materiais;
-                            }
+                            dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionadaObj.name; // 'cirurgia_proposta'
+
+                            // Adicionar os campos de instrumental, materiais, etc. para Marcapasso
+                            dados.campos_dinamicos.pre_operatorio = cirurgiaSelecionadaObj.pre_operatorio;
+                            dados.campos_dinamicos.instrumental_cirurgico = cirurgiaSelecionadaObj.instrumental_cirurgico;
+                            dados.campos_dinamicos.materiais_consignados = cirurgiaSelecionadaObj.materiais_consignados;
+                            dados.campos_dinamicos.empresa_consignados = cirurgiaSelecionadaObj.empresa_consignados;
+                            dados.campos_dinamicos.fios_cirurgicos = cirurgiaSelecionadaObj.fios_cirurgicos;
+                            dados.campos_dinamicos.bist_eletrico = cirurgiaSelecionadaObj.bist_eletrico;
+                            dados.campos_dinamicos.torre_video = cirurgiaSelecionadaObj.torre_video;
+                            dados.campos_dinamicos.ultrassom = cirurgiaSelecionadaObj.ultrassom;
+                            dados.campos_dinamicos.tca = cirurgiaSelecionadaObj.tca;
+                            dados.campos_dinamicos.eco_trans = cirurgiaSelecionadaObj.eco_trans;
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = "";
                         }
                     } else if (campoConfig.tipo === "select" && campoConfig.placeholder_template_nome && campoConfig.placeholder_template_crm) {
                         const selectedCirurgiaoId = value;
-                        const cirurgiaoObj = CIRURGIOES_AUXILIARES.find(c => c.id === selectedCirurgiaoId);
+                        const cirurgiaoObj = CIRURGIOES.find(c => c.id === selectedCirurgiaoId);
                         if (cirurgiaoObj) {
                             dados.campos_dinamicos[campoConfig.placeholder_template_nome] = cirurgiaoObj.name;
                             dados.campos_dinamicos[campoConfig.placeholder_template_crm] = cirurgiaoObj.crm;
@@ -329,11 +336,11 @@ export function coletarDadosDoFormulario() {
                              dados.campos_dinamicos[campoConfig.placeholder_template_nome] = "";
                              dados.campos_dinamicos[campoConfig.placeholder_template_crm] = "";
                         }
-                    } else if (campoConfig.placeholder_template) { 
-                        if (inputElement.tagName === 'SELECT' && !campoConfig.placeholder_template_nome) { 
+                    } else if (campoConfig.placeholder_template) {
+                        if (inputElement.tagName === 'SELECT' && !campoConfig.placeholder_template_nome) {
                              const selectedOption = inputElement.options[inputElement.selectedIndex];
                              dados.campos_dinamicos[campoConfig.placeholder_template] = selectedOption ? selectedOption.text : "";
-                        } else { 
+                        } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = value;
                         }
                     } else {
@@ -344,7 +351,21 @@ export function coletarDadosDoFormulario() {
         });
     }
 
-    // Coleta dos pedidos de exames
+    if (tipoServicoSelecionado === "Cirurgia Cardíaca") {
+        dados.campos_dinamicos.pre_operatorio = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.pre_operatorio;
+        dados.campos_dinamicos.instrumental_cirurgico = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.instrumental_cirurgico;
+        dados.campos_dinamicos.materiais_consignados = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.materiais_consignados;
+        dados.campos_dinamicos.empresa_consignados = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.empresa_consignados;
+        dados.campos_dinamicos.fios_cirurgicos = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.fios_cirurgicos;
+        // Equipamentos para Cirurgia Cardíaca
+        dados.campos_dinamicos.bist_eletrico = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.bist_eletrico;
+        dados.campos_dinamicos.torre_video = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.torre_video;
+        dados.campos_dinamicos.ultrassom = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.ultrassom;
+        dados.campos_dinamicos.tca = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.tca;
+        dados.campos_dinamicos.eco_trans = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.eco_trans;
+    }
+
+
     const exameECGCheckbox = document.getElementById('exameECG');
     if (exameECGCheckbox && exameECGCheckbox.checked) {
         dados.pedidos_exames.push(exameECGCheckbox.value);
