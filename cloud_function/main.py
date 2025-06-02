@@ -11,7 +11,7 @@ from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
 
 from docxtpl import DocxTemplate
 
-IS_TEST_ENVIRONMENT = True
+IS_TEST_ENVIRONMENT = False
 SERVICE_ACCOUNT_FILE_PATH_FOR_TESTING = 'cloud_function/jesus-doc-generator-dee55c6191db.json'
 
 PASTA_RAIZ_GERADOR_NOME = "Gerador de Documentos Médicos"
@@ -24,11 +24,11 @@ DOCUMENTOS_POR_SERVICO = {
     ],
     "Eletrofisiologia": [
         {"nome_documento_logico": "Lista_Material_Eletrofisiologia", "template_id": "1hSWY4TztveMj6Y7cduW_YBGg2FIRq5tM204RsH_oiQw"},
-        {"nome_documento_logico": "Aviso_Hemodinamica_Eletrofisiologia", "template_id": "1AINdqy0i2YB-9p5zlLbbleqSVSKSjq0iY6RZTSv5IW4"},
+        {"nome_documento_logico": "Aviso_Hemodinamica_Eletrofisiologia", "template_id": "1AVDcc67hy7aaCcuNt1EYaJk25J2QErKyNwIoBsfGOiY"},
         {"nome_documento_logico": "Priorizacao_Eletrofisiologia", "template_id": "1NpRDSnzqvarzjF_H2Ykg1hpxI61az-SiD4OUCnaPkvQ"}
     ],
     "Cirurgia Cardíaca": [
-        {"nome_documento_logico": "Aviso_Hemodinamica_Cirurgia_Cardiaca", "template_id": "1AINdqy0i2YB-9p5zlLbbleqSVSKSjq0iY6RZTSv5IW4"},
+        {"nome_documento_logico": "Aviso_Hemodinamica_Cirurgia_Cardiaca", "template_id": "1AVDcc67hy7aaCcuNt1EYaJk25J2QErKyNwIoBsfGOiY"},
         {"nome_documento_logico": "Priorizacao_Cirurgia_Cardiaca", "template_id": "1NpRDSnzqvarzjF_H2Ykg1hpxI61az-SiD4OUCnaPkvQ"},
         {"nome_documento_logico": "Aviso_Eletivo_Cirurgia_Cardiaca", "template_id": "1mT8_xHTuuMn1uKkVae2_c8cH41PSavFuleqKLE6WxhE"}
     ]
@@ -211,7 +211,7 @@ def gerar_documento_http(request):
         if not _id_pasta_raiz_gerador_cache: return (json.dumps({"sucesso": False, "erro": "Falha ao obter/criar pasta raiz."}), 500, headers)
         print(f"Usando ID da pasta raiz: {_id_pasta_raiz_gerador_cache}")
 
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") # Adicionado H-M-S para subpastas mais únicas
+        timestamp = datetime.now().strftime("%Y-%m-%d") # Adicionado H-M-S para subpastas mais únicas
         nome_paciente_sanitizado = dados_formulario.get('paciente', {}).get('nome_social', 'PacienteDesconhecido').replace(' ', '_').replace('/', '_')
         nome_subpasta = f"{nome_paciente_sanitizado}-{timestamp}"
         

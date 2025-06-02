@@ -59,7 +59,7 @@ async function chamarCloudFunctionGerarDocumento() {
         exibirMensagemStatus('ERRO: URL da Cloud Function não configurada em js/config.js. Contacte o administrador.', 'erro');
         return;
     }
-    exibirMensagemStatus('Enviando solicitação para o servidor...', 'info');
+    exibirMensagemStatus('Solicitação enviada ao servidor. Processando...', 'info');
 
     try {
         const response = await fetch(CLOUD_FUNCTION_URL, {
