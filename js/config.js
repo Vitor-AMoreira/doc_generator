@@ -190,7 +190,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             label: "CID:",
             tipo: "cid_custom_select",
             placeholder_template_codigo: "codigo_cid",
-            placeholder_template_descricao: "descricao_cid"
+            placeholder_template_descricao: "diagnostico"
         },
         {
             id: "cirurgia_proposta_aviso_eletivo_ef",

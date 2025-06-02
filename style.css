@@ -44,7 +44,11 @@ body {
     color: #555;
     margin: 5px 0;
     padding: 8px;
-    border-left: 3px solid transparent; /* Base for type-specific borders */
+    border-left: 3px solid transparent;
+    overflow-wrap: break-word; /* Garante a quebra de palavras longas */
+    word-wrap: break-word; /* Fallback para navegadores mais antigos */
+    word-break: break-all; /* Força a quebra de qualquer string longa, como URLs */
+    white-space: pre-wrap; /* Preserva espaços em branco e quebras de linha, mas quebra o texto */
 }
 .status-erro {
     color: #dc3545;
@@ -64,7 +68,7 @@ body {
     background-color: #cce5ff;
 }
 .status-aviso {
-    color: #856404;
+    color: #856404; /* Cor de texto mais escura para melhor contraste com fundo amarelo */
     font-weight: bold;
     border-left-color: #ffc107;
     background-color: #fff3cd;
@@ -272,22 +276,15 @@ button:last-child {
     .preview-panel {
         border-bottom: none;
     }
-    .form-grid { /* General form grid can stack */
+    .form-grid { 
         grid-template-columns: 1fr;
     }
-     /* Keep patient data grid rows as two columns even on small screens if specifically desired, */
-     /* otherwise they would also stack due to the above. */
-     /* If stacking is okay for patient data too on small screens, remove the next rule. */
-    .patient-data-grid .form-row {
-        grid-template-columns: 1fr 1fr; /* Keep two columns */
+    .patient-data-grid .form-row { /* Mantém duas colunas ou permite empilhar */
+        /* grid-template-columns: 1fr 1fr; */ /* Descomente para forçar duas colunas */
+        grid-template-columns: 1fr; /* Comente ou altere para 1fr 1fr se preferir manter 2 colunas */
     }
-    /* Or, if stacking is preferred for patient data on small screens:
-    .patient-data-grid .form-row {
-        grid-template-columns: 1fr;
-    }
-    */
 
-    .span-2, .span-3, .span-4, .span-full { /* These might not be used much with new patient layout */
+    .span-2, .span-3, .span-4, .span-full { 
         grid-column: 1 / -1;
     }
     .action-section {
