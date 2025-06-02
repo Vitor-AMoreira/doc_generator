@@ -11,7 +11,7 @@ import {
     INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA
 } from './config.js';
 
-let cidDataGlobal = [];
+export let cidDataGlobal = [];
 let currentCIDPage = 1;
 let currentCIDSearchTerm = "";
 
@@ -20,7 +20,7 @@ const DOMElements = {
     selectServicoTipo: document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo),
     containerCamposPersonalizados: document.getElementById(FORM_ELEMENT_IDS.containerCamposPersonalizados),
     statusMessages: document.getElementById(FORM_ELEMENT_IDS.statusMessages),
-    outputLink: document.getElementById(FORM_ELEMENT_IDS.outputLink)
+    // outputLink: document.getElementById(FORM_ELEMENT_IDS.outputLink) // Potentially remove if not used
 };
 
 export async function carregarDadosCID() {
@@ -28,7 +28,7 @@ export async function carregarDadosCID() {
         const response = await fetch(CID_CSV_PATH);
         if (!response.ok) {
             console.error(`Erro ao buscar o arquivo CID: ${response.statusText}`);
-            exibirMensagemStatus(`Falha ao carregar dados de CID.`, 'erro');
+            exibirMensagemStatus(`Falha ao carregar dados de CID. Verifique o console.`, 'erro');
             return;
         }
         const csvText = await response.text();
@@ -196,7 +196,7 @@ export function salvarMedicoSelecionado(chaveStorage) {
 export function atualizarCamposPersonalizados() {
     if (!DOMElements.selectServicoTipo || !DOMElements.containerCamposPersonalizados) return;
     const tipoServicoSelecionado = DOMElements.selectServicoTipo.value;
-    DOMElements.containerCamposPersonalizados.innerHTML = '';
+    DOMElements.containerCamposPersonalizados.innerHTML = ''; // Limpa campos anteriores
 
     const camposParaServico = CAMPOS_DINAMICOS_POR_SERVICO[tipoServicoSelecionado];
 
@@ -310,9 +310,8 @@ export function coletarDadosDoFormulario() {
                         const selectedCirurgiaId = value;
                         const cirurgiaSelecionadaObj = OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO.find(c => c.id === selectedCirurgiaId);
                         if (cirurgiaSelecionadaObj) {
-                            dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionadaObj.name; // 'cirurgia_proposta'
+                            dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionadaObj.name;
 
-                            // Adicionar os campos de instrumental, materiais, etc. para Marcapasso
                             dados.campos_dinamicos.pre_operatorio = cirurgiaSelecionadaObj.pre_operatorio;
                             dados.campos_dinamicos.instrumental_cirurgico = cirurgiaSelecionadaObj.instrumental_cirurgico;
                             dados.campos_dinamicos.materiais_consignados = cirurgiaSelecionadaObj.materiais_consignados;
@@ -357,7 +356,6 @@ export function coletarDadosDoFormulario() {
         dados.campos_dinamicos.materiais_consignados = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.materiais_consignados;
         dados.campos_dinamicos.empresa_consignados = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.empresa_consignados;
         dados.campos_dinamicos.fios_cirurgicos = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.fios_cirurgicos;
-        // Equipamentos para Cirurgia Cardíaca
         dados.campos_dinamicos.bist_eletrico = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.bist_eletrico;
         dados.campos_dinamicos.torre_video = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.torre_video;
         dados.campos_dinamicos.ultrassom = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.ultrassom;
@@ -384,29 +382,45 @@ export function coletarDadosDoFormulario() {
     return dados;
 }
 
-export function exibirMensagemStatus(mensagem, tipo = 'info') {
+export function exibirMensagemStatus(mensagem, tipo = 'info', limparAnteriores = false) {
     if (!DOMElements.statusMessages) return;
+
+    if (limparAnteriores) {
+        DOMElements.statusMessages.innerHTML = '';
+    }
+
     const p = document.createElement('p');
-    p.textContent = mensagem;
+    p.innerHTML = mensagem; // Use innerHTML to allow links or other HTML content
     p.className = `status-${tipo}`;
-    DOMElements.statusMessages.innerHTML = '';
+
+    // Optional: Add a timestamp for clarity
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const timestampSpan = document.createElement('span');
+    timestampSpan.style.fontSize = '0.8em';
+    timestampSpan.style.marginLeft = '10px';
+    timestampSpan.style.color = '#777';
+    timestampSpan.textContent = `(${timestamp})`;
+    p.appendChild(timestampSpan);
+
     DOMElements.statusMessages.appendChild(p);
+    DOMElements.statusMessages.scrollTop = DOMElements.statusMessages.scrollHeight; // Auto-scroll to the latest message
 }
 
+
 export function exibirLinkDocumento(texto, link) {
-    if (!DOMElements.outputLink) return;
+    let mensagemHtml = texto;
     if (link) {
-        const p = document.createElement('p');
-        p.innerHTML = `${texto}: <a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>`;
-        DOMElements.outputLink.appendChild(p);
-    } else {
-        const p = document.createElement('p');
-        p.textContent = texto;
-        DOMElements.outputLink.appendChild(p);
+        mensagemHtml += `: <a href="${link}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline;">${link}</a>`;
     }
+    exibirMensagemStatus(mensagemHtml, 'info'); // Appends as an informational status message
 }
 
 export function limparResultado() {
-    if (DOMElements.outputLink) DOMElements.outputLink.innerHTML = "";
-    if (DOMElements.statusMessages) DOMElements.statusMessages.innerHTML = "<p>Preencha o formulário e clique em gerar.</p>";
+    // outputLink is now deprecated in favor of appending to statusMessages.
+    // The statusMessages div is cleared by exibirMensagemStatus with limparAnteriores=true.
+    const outputLinkEl = document.getElementById(FORM_ELEMENT_IDS.outputLink);
+    if (outputLinkEl) {
+        outputLinkEl.innerHTML = "";
+        outputLinkEl.style.display = 'none'; // Hide it as it's no longer primary
+    }
 }

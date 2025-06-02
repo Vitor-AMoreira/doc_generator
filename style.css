@@ -43,11 +43,32 @@ body {
     font-style: italic;
     color: #555;
     margin: 5px 0;
+    padding: 8px;
+    border-left: 3px solid transparent; /* Base for type-specific borders */
 }
-.status-erro { color: #dc3545; font-weight: bold; }
-.status-sucesso { color: #28a745; font-weight: bold; }
-.status-info { color: #0056b3; }
-.status-aviso { color: #ffc107; font-weight: bold;}
+.status-erro {
+    color: #dc3545;
+    font-weight: bold;
+    border-left-color: #dc3545;
+    background-color: #f8d7da;
+}
+.status-sucesso {
+    color: #28a745;
+    font-weight: bold;
+    border-left-color: #28a745;
+    background-color: #d4edda;
+}
+.status-info {
+    color: #0056b3;
+    border-left-color: #0056b3;
+    background-color: #cce5ff;
+}
+.status-aviso {
+    color: #856404;
+    font-weight: bold;
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+}
 
 
 h1 {
@@ -78,14 +99,27 @@ h1 {
     align-items: center;
 }
 
-.patient-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+/* New styles for patient data layout */
+.patient-data-grid .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Always two columns per row */
+    gap: 20px;
+    margin-bottom: 15px; /* Space between rows */
 }
+.patient-data-grid .form-row:last-child {
+    margin-bottom: 0;
+}
+
+.patient-data-grid .form-group {
+    display: flex;
+    flex-direction: column; /* Label above input/select */
+}
+
 
 label {
     font-weight: bold;
     display: block;
-    margin-bottom: 5px; 
+    margin-bottom: 5px;
 }
 
 input[type="text"],
@@ -102,14 +136,14 @@ textarea {
 
 /* Ajuste para checkboxes terem label ao lado */
 .form-grid div.form-group input[type="checkbox"] {
-    width: auto; /* Para não ocupar 100% */
-    margin-right: 8px; /* Espaço entre checkbox e label */
+    width: auto;
+    margin-right: 8px;
     vertical-align: middle;
 }
 
 .form-grid div.form-group label {
-    display: inline; /* Para alinhar com o checkbox */
-    font-weight: normal; /* Para não ficar negrito como as labels principais */
+    display: inline;
+    font-weight: normal;
     margin-bottom: 0;
 }
 
@@ -128,32 +162,31 @@ textarea {
     margin-bottom: 15px;
 }
 
-/* Estilos para o campo CID customizado */
 .custom-cid-dropdown {
-    position: relative; 
+    position: relative;
 }
 
 .custom-cid-trigger {
     cursor: pointer;
-    background-color: #fff; 
+    background-color: #fff;
 }
 
 .custom-cid-panel {
     position: absolute;
-    top: 100%; 
+    top: 100%;
     left: 0;
     right: 0;
     border: 1px solid #ccc;
     background-color: white;
-    z-index: 1000; 
-    max-height: 300px; 
+    z-index: 1000;
+    max-height: 300px;
     overflow-y: auto;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border-radius: 0 0 4px 4px;
 }
 
 .custom-cid-search {
-    width: calc(100% - 20px); 
+    width: calc(100% - 20px);
     padding: 8px 10px;
     margin: 5px;
     border: 1px solid #ddd;
@@ -239,16 +272,28 @@ button:last-child {
     .preview-panel {
         border-bottom: none;
     }
-    .form-grid, .patient-grid {
+    .form-grid { /* General form grid can stack */
         grid-template-columns: 1fr;
     }
-    .span-2, .span-3, .span-4, .span-full {
+     /* Keep patient data grid rows as two columns even on small screens if specifically desired, */
+     /* otherwise they would also stack due to the above. */
+     /* If stacking is okay for patient data too on small screens, remove the next rule. */
+    .patient-data-grid .form-row {
+        grid-template-columns: 1fr 1fr; /* Keep two columns */
+    }
+    /* Or, if stacking is preferred for patient data on small screens:
+    .patient-data-grid .form-row {
+        grid-template-columns: 1fr;
+    }
+    */
+
+    .span-2, .span-3, .span-4, .span-full { /* These might not be used much with new patient layout */
         grid-column: 1 / -1;
     }
     .action-section {
         text-align: center;
     }
-    .custom-cid-panel { 
-        max-height: 200px; 
+    .custom-cid-panel {
+        max-height: 200px;
     }
 }

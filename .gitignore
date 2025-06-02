@@ -1,5 +1,7 @@
 /cirurgiashc-main
 /cirurgiashc-main.zip
 /extracao1
+/archive
 /v1
 /__pycache__
+cloud_function/*.json
