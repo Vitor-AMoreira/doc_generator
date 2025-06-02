@@ -1,20 +1,16 @@
 // js/config.js
 export const CHAVE_MEDICO_SELECIONADO = 'medicalDocApp_selectedDoctorId_v6';
 
-// *** IMPORTANTE: URL da sua Cloud Function ***
-export const CLOUD_FUNCTION_URL = 'https://southamerica-east1-jesus-doc-generator.cloudfunctions.net/doc_generator'; // Substitua pela sua URL real
+export const CLOUD_FUNCTION_URL = 'https://southamerica-east1-jesus-doc-generator.cloudfunctions.net/doc_generator';
 
-// Caminho para o arquivo CSV dos CIDs
 export const CID_CSV_PATH = 'cid.csv';
-export const CIDS_PER_PAGE = 50; // Número de CIDs a carregar por vez no "Carregar mais"
+export const CIDS_PER_PAGE = 50;
 
-// Médicos principais (solicitantes do documento)
 export const MEDICOS = [
     { id: '1', name: "Matheus Henrique de Jesus Lima", crm: "31548", cpf: "70235523160" },
     { id: '2', name: "Thaine Inacio Mendonça", crm: "27066", cpf: "70114148198" },
 ];
 
-// Cirurgiões para seleção em campos específicos (ex: Aviso Eletivo)
 export const CIRURGIOES = [
     { id: 'luiz_antonio', name: "Luiz Antonio", crm: "6873" },
     { id: 'guilherme_brasil', name: "Guilherme Brasil", crm: "29479" },
@@ -25,13 +21,11 @@ const INSTRUMENTAL_MATERIAIS_BASE_MARCAPASSO_CDI = {
     pre_operatorio: "",
     empresa_consignados: "",
     fios_cirurgicos: "",
-    // Equipamentos específicos para Marcapasso (vazios conforme solicitado)
     bist_eletrico: "",
     torre_video: "",
     ultrassom: "",
     tca: "",
     eco_trans: ""
-    // Os demais placeholders (bist_argonio, escopia, mic_olympus, mic_zeiss, mic_leica) não estão na imagem, então não são adicionados aqui.
 };
 
 const INSTRUMENTAL_MATERIAIS_MP_DDD = {
@@ -57,7 +51,6 @@ export const INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA = {
     ultrassom: "X",
     tca: "X",
     eco_trans: "X"
-    // Os demais placeholders (bist_argonio, escopia, mic_olympus, mic_zeiss, mic_leica) não estão na imagem, então não são incluídos.
 };
 
 export const OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO = [
@@ -83,7 +76,6 @@ export const OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO = [
     }
 ];
 
-// Opções para dropdown de Cirurgia Proposta para Eletrofisiologia
 export const OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA = [
     { value: "0406050015", display: "ESTUDO ELETROFISIOLOGICO DIAGNOSTICO", tuss: "0406050015", fullOriginalString: "0406050015;ESTUDO ELETROFISIOLOGICO DIAGNOSTICO (ESTUDO ELETROFISIOLOGICO DIAGNOSTICO)" },
     { value: "0406050023", display: "ABLACAO DE FLUTTER ATRIAL", tuss: "0406050023", fullOriginalString: "0406050023;ESTUDO ELETROFISIOLOGICO TERAPEUTICO I (ABLACAO DE FLUTTER ATRIAL)" },
@@ -99,6 +91,22 @@ export const OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA = [
     { value: "0406050139", display: "ABLACAO DE VIAS ANOMALAS ESQUERDAS", tuss: "0406050139", fullOriginalString: "0406050139;ESTUDO ELETROFISIOLOGICO TERAPEUTICO II (ABLACAO DE VIAS ANOMALAS ESQUERDAS)" },
     { value: "0211020010_ESQ", display: "CATETERISMO CARDIACO ESQUERDO", tuss: "0211020010", fullOriginalString: "0211020010;CATETERISMO CARDIACO ESQUERDO (CATETERISMO CARDIACO ESQUERDO)" },
     { value: "0211020010_DIR", display: "CATETERISMO CARDIACO DIREITO", tuss: "0211020010", fullOriginalString: "0211020010;CATETERISMO CARDIACO DIREITO (CATETERISMO CARDIACO DIREITO)" }
+];
+
+export const OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA = [
+    {
+        value: "0211020010_CCE",
+        display: "CATETERISMO CARDIACO ESQUERDO",
+        tuss: "0211020010",
+        fullOriginalString: "0211020010;CATETERISMO CARDIACO ESQUERDO (CATETERISMO CARDIACO ESQUERDO)"
+    },
+    {
+        value: "0211020010_CCD",
+        display: "CATETERISMO CARDIACO DIREITO",
+        tuss: "0211020010",
+        fullOriginalString: "0211020010;CATETERISMO CARDIACO DIREITO (CATETERISMO CARDIACO DIREITO)"
+    },
+    // Você pode adicionar mais opções aqui se necessário
 ];
 
 
@@ -118,9 +126,9 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         },
         {
             id: "diagnostico_aviso_eletivo_mp",
-            label: "Diagnóstico:",
+            label: "Diagnóstico (Marcapasso):",
             tipo: "text",
-            placeholder_template: "diagnostico"
+            placeholder_template: "diagnostico" // Este 'diagnostico' é para Marcapasso
         },
         {
             id: "cirurgia_proposta_aviso_eletivo_mp",
@@ -141,7 +149,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
     "Cirurgia Cardíaca": [
         {
             id: "detalhes_priorizacao_cc",
-            label: "Condição Clínica:",
+            label: "Condição Clínica (detalhes adicionais):",
             tipo: "textarea",
             placeholder_template: "condicao_clinica"
         },
@@ -151,17 +159,18 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             tipo: "date",
             placeholder_template: "data_cirurgia"
         },
-        {
+        { // Campo de Diagnóstico como texto, como era antes
             id: "diagnostico_aviso_eletivo_cc",
             label: "Diagnóstico:",
             tipo: "text",
             placeholder_template: "diagnostico"
         },
-        {
+        { 
             id: "cirurgia_proposta_aviso_eletivo_cc",
             label: "Cirurgia Proposta:",
-            tipo: "textarea",
-            placeholder_template: "cirurgia_proposta"
+            tipo: "select",
+            opcoes_dropdown: OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA,
+            placeholder_template: "cirurgia_proposta" // Placeholder para o template
         },
         {
             id: "cirurgiao_aviso_eletivo_cc",
@@ -177,7 +186,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             id: "detalhes_priorizacao_ef",
             label: "Condição Clínica:",
             tipo: "textarea",
-            placeholder_template: "campo_personalizado"
+            placeholder_template: "campo_personalizado" 
         },
         {
             id: "data_cirurgia_aviso_eletivo_ef",
@@ -189,8 +198,8 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             id: "cid_selecionado_ef",
             label: "CID:",
             tipo: "cid_custom_select",
-            placeholder_template_codigo: "codigo_cid",
-            placeholder_template_descricao: "diagnostico"
+            placeholder_template_codigo: "codigo_cid", 
+            placeholder_template_descricao: "descricao_cid" 
         },
         {
             id: "cirurgia_proposta_aviso_eletivo_ef",

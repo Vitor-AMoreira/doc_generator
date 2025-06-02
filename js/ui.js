@@ -5,6 +5,7 @@ import {
     FORM_ELEMENT_IDS,
     OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA,
     OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO,
+    OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA, // Importar a nova lista
     CIRURGIOES,
     CID_CSV_PATH,
     CIDS_PER_PAGE,
@@ -20,7 +21,7 @@ const DOMElements = {
     selectServicoTipo: document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo),
     containerCamposPersonalizados: document.getElementById(FORM_ELEMENT_IDS.containerCamposPersonalizados),
     statusMessages: document.getElementById(FORM_ELEMENT_IDS.statusMessages),
-    // outputLink: document.getElementById(FORM_ELEMENT_IDS.outputLink) // Potentially remove if not used
+    // outputLink: document.getElementById(FORM_ELEMENT_IDS.outputLink) // Removido ou não utilizado
 };
 
 export async function carregarDadosCID() {
@@ -196,7 +197,7 @@ export function salvarMedicoSelecionado(chaveStorage) {
 export function atualizarCamposPersonalizados() {
     if (!DOMElements.selectServicoTipo || !DOMElements.containerCamposPersonalizados) return;
     const tipoServicoSelecionado = DOMElements.selectServicoTipo.value;
-    DOMElements.containerCamposPersonalizados.innerHTML = ''; // Limpa campos anteriores
+    DOMElements.containerCamposPersonalizados.innerHTML = '';
 
     const camposParaServico = CAMPOS_DINAMICOS_POR_SERVICO[tipoServicoSelecionado];
 
@@ -206,7 +207,7 @@ export function atualizarCamposPersonalizados() {
                 criarCampoCIDCustomizado(DOMElements.containerCamposPersonalizados, campoConfig);
             } else {
                 const divCampo = document.createElement('div');
-                divCampo.className = 'form-group span-full';
+                divCampo.className = 'form-group span-full'; // Assumindo span-full, pode precisar de ajuste se não for
 
                 const label = document.createElement('label');
                 label.setAttribute('for', campoConfig.id);
@@ -234,17 +235,17 @@ export function atualizarCamposPersonalizados() {
                     if (opcoes && opcoes.length > 0) {
                         opcoes.forEach(opcao => {
                             const optionEl = document.createElement('option');
-                            optionEl.value = opcao.value || opcao.id;
-                            optionEl.textContent = opcao.display || opcao.name;
+                            optionEl.value = opcao.value || opcao.id; // 'value' para Eletro/Cardíaca, 'id' para Marcapasso
+                            optionEl.textContent = opcao.display || opcao.name; // 'display' para Eletro/Cardíaca, 'name' para Marcapasso
                             inputElement.appendChild(optionEl);
                         });
                     }
-                } else {
+                } else { // text, date, etc.
                     inputElement = document.createElement('input');
                     inputElement.type = campoConfig.tipo;
                 }
                 inputElement.id = campoConfig.id;
-                inputElement.name = campoConfig.id;
+                inputElement.name = campoConfig.id; // importante para coleta se usar form.elements
 
                 divCampo.appendChild(inputElement);
                 DOMElements.containerCamposPersonalizados.appendChild(divCampo);
@@ -297,8 +298,18 @@ export function coletarDadosDoFormulario() {
                     const value = inputElement.value;
 
                     if (tipoServicoSelecionado === "Eletrofisiologia" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_ef") {
-                        const selectedTussValue = value;
-                        const cirurgiaSelecionada = OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA.find(c => c.value === selectedTussValue);
+                        const selectedValue = value;
+                        const cirurgiaSelecionada = OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA.find(c => c.value === selectedValue);
+                        if (cirurgiaSelecionada) {
+                            dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionada.display;
+                            dados.campos_dinamicos.procedimento = cirurgiaSelecionada.fullOriginalString.split(";")[1].split(" (")[0].trim();
+                            dados.campos_dinamicos.procedimento_codigo = cirurgiaSelecionada.tuss;
+                        } else {
+                            dados.campos_dinamicos[campoConfig.placeholder_template] = "";
+                        }
+                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_cc") {
+                        const selectedValue = value;
+                        const cirurgiaSelecionada = OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA.find(c => c.value === selectedValue);
                         if (cirurgiaSelecionada) {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionada.display;
                             dados.campos_dinamicos.procedimento = cirurgiaSelecionada.fullOriginalString.split(";")[1].split(" (")[0].trim();
@@ -311,7 +322,6 @@ export function coletarDadosDoFormulario() {
                         const cirurgiaSelecionadaObj = OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO.find(c => c.id === selectedCirurgiaId);
                         if (cirurgiaSelecionadaObj) {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionadaObj.name;
-
                             dados.campos_dinamicos.pre_operatorio = cirurgiaSelecionadaObj.pre_operatorio;
                             dados.campos_dinamicos.instrumental_cirurgico = cirurgiaSelecionadaObj.instrumental_cirurgico;
                             dados.campos_dinamicos.materiais_consignados = cirurgiaSelecionadaObj.materiais_consignados;
@@ -325,7 +335,7 @@ export function coletarDadosDoFormulario() {
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = "";
                         }
-                    } else if (campoConfig.tipo === "select" && campoConfig.placeholder_template_nome && campoConfig.placeholder_template_crm) {
+                    } else if (campoConfig.tipo === "select" && campoConfig.placeholder_template_nome && campoConfig.placeholder_template_crm) { // Cirurgião
                         const selectedCirurgiaoId = value;
                         const cirurgiaoObj = CIRURGIOES.find(c => c.id === selectedCirurgiaoId);
                         if (cirurgiaoObj) {
@@ -335,7 +345,7 @@ export function coletarDadosDoFormulario() {
                              dados.campos_dinamicos[campoConfig.placeholder_template_nome] = "";
                              dados.campos_dinamicos[campoConfig.placeholder_template_crm] = "";
                         }
-                    } else if (campoConfig.placeholder_template) {
+                    } else if (campoConfig.placeholder_template) { // Campos genéricos com placeholder_template
                         if (inputElement.tagName === 'SELECT' && !campoConfig.placeholder_template_nome) {
                              const selectedOption = inputElement.options[inputElement.selectedIndex];
                              dados.campos_dinamicos[campoConfig.placeholder_template] = selectedOption ? selectedOption.text : "";
@@ -351,6 +361,11 @@ export function coletarDadosDoFormulario() {
     }
 
     if (tipoServicoSelecionado === "Cirurgia Cardíaca") {
+        // Os campos de instrumental e materiais para Cirurgia Cardíaca são fixos e adicionados aqui.
+        // A lógica para preenchê-los com base na 'cirurgia_proposta_aviso_eletivo_cc'
+        // não foi solicitada da mesma forma que para Marcapasso, então mantemos a atribuição direta.
+        // Se precisar ser dinâmico com base na cirurgia, a estrutura de OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA
+        // e a lógica aqui precisariam ser expandidas como no caso de Marcapasso.
         dados.campos_dinamicos.pre_operatorio = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.pre_operatorio;
         dados.campos_dinamicos.instrumental_cirurgico = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.instrumental_cirurgico;
         dados.campos_dinamicos.materiais_consignados = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.materiais_consignados;
@@ -390,10 +405,9 @@ export function exibirMensagemStatus(mensagem, tipo = 'info', limparAnteriores =
     }
 
     const p = document.createElement('p');
-    p.innerHTML = mensagem; // Use innerHTML to allow links or other HTML content
+    p.innerHTML = mensagem;
     p.className = `status-${tipo}`;
 
-    // Optional: Add a timestamp for clarity
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const timestampSpan = document.createElement('span');
     timestampSpan.style.fontSize = '0.8em';
@@ -403,24 +417,22 @@ export function exibirMensagemStatus(mensagem, tipo = 'info', limparAnteriores =
     p.appendChild(timestampSpan);
 
     DOMElements.statusMessages.appendChild(p);
-    DOMElements.statusMessages.scrollTop = DOMElements.statusMessages.scrollHeight; // Auto-scroll to the latest message
+    DOMElements.statusMessages.scrollTop = DOMElements.statusMessages.scrollHeight;
 }
-
 
 export function exibirLinkDocumento(texto, link) {
     let mensagemHtml = texto;
     if (link) {
         mensagemHtml += `: <a href="${link}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline;">${link}</a>`;
     }
-    exibirMensagemStatus(mensagemHtml, 'info'); // Appends as an informational status message
+    exibirMensagemStatus(mensagemHtml, 'info');
 }
 
 export function limparResultado() {
-    // outputLink is now deprecated in favor of appending to statusMessages.
-    // The statusMessages div is cleared by exibirMensagemStatus with limparAnteriores=true.
     const outputLinkEl = document.getElementById(FORM_ELEMENT_IDS.outputLink);
-    if (outputLinkEl) {
+    if (outputLinkEl) { // Verifica se o elemento existe
         outputLinkEl.innerHTML = "";
-        outputLinkEl.style.display = 'none'; // Hide it as it's no longer primary
+        outputLinkEl.style.display = 'none';
     }
+    // Não limpa statusMessages aqui, é controlado por exibirMensagemStatus
 }
