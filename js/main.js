@@ -24,7 +24,7 @@ import {
 } from './ui.js';
 
 function validarData(dataStr, fieldLabel = "Data") {
-    if (!dataStr.trim()) { 
+    if (!dataStr.trim()) {
         return true;
     }
     const regexData = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/;
@@ -39,7 +39,7 @@ function validarData(dataStr, fieldLabel = "Data") {
     const mes = parseInt(match[2], 10);
     const ano = parseInt(match[3], 10);
 
-    if (ano < 1900 || ano > new Date().getFullYear() + 10) { 
+    if (ano < 1900 || ano > new Date().getFullYear() + 10) {
         exibirMensagemStatus(`ERRO: Ano da ${fieldLabel} inválido.`, 'erro');
         return false;
     }
@@ -86,17 +86,17 @@ async function chamarCloudFunctionGerarDocumento() {
         if (campoCfg.isDateInput && campoCfg.tipo === 'text') {
             const el = document.getElementById(campoCfg.id);
             if (el && el.value.trim() && !validarData(el.value, campoCfg.label.replace(":", ""))) {
-                return; 
+                return;
             }
         }
     }
 
 
     if (dadosForm.servico.tipo === "Marcapassos") {
-        if (!dadosForm.campos_dinamicos.cirurgia_proposta_aviso) { 
+        if (!dadosForm.campos_dinamicos.cirurgia_proposta_aviso) {
             exibirMensagemStatus("ERRO: Por favor, selecione a Cirurgia Proposta para Marcapassos.", 'erro'); return;
         }
-        if (!dadosForm.campos_dinamicos.codigo_cid || !dadosForm.campos_dinamicos.diagnostico) { 
+        if (!dadosForm.campos_dinamicos.codigo_cid || !dadosForm.campos_dinamicos.diagnostico) {
             exibirMensagemStatus("ERRO: Por favor, selecione o CID para Marcapassos.", 'erro'); return;
         }
     }
@@ -166,7 +166,6 @@ async function chamarCloudFunctionGerarDocumento() {
     } finally {
         document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento).disabled = false;
         limparFormularioCompleto();
-        // Removida a mensagem "Formulário limpo após tentativa de geração."
     }
 }
 
@@ -208,10 +207,8 @@ if (document.readyState === 'loading') {
     initApp();
 }
 
-// --- Test Function and Helpers ---
-
 function getRandomElement(arr) {
-    if (!arr || arr.length === 0) return null; 
+    if (!arr || arr.length === 0) return null;
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -238,7 +235,7 @@ function getRandomDate(start, end) {
     const dia = String(date.getDate()).padStart(2, '0');
     const mes = String(date.getMonth() + 1).padStart(2, '0');
     const ano = date.getFullYear();
-    return `${dia}/${mes}/${ano}`; 
+    return `${dia}/${mes}/${ano}`;
 }
 
 
@@ -261,7 +258,7 @@ const sobrenomes = ["Silva", "Santos", "Oliveira", "Costa", "Pereira", "Rodrigue
 
 async function preencherFormularioParaTeste(servicoDesejado) {
     console.log(`Iniciando preenchimento de teste para o serviço: ${servicoDesejado}`);
-    limparFormularioCompleto(); 
+    limparFormularioCompleto();
 
     const selectMedicoEl = document.getElementById(FORM_ELEMENT_IDS.selectMedico);
     if (selectMedicoEl && MEDICOS.length > 0) {
@@ -279,13 +276,13 @@ async function preencherFormularioParaTeste(servicoDesejado) {
     if (sexoOptions.length > 0) sexoSelect.value = getRandomElement(sexoOptions).value;
 
     document.getElementById(FORM_ELEMENT_IDS.pacNomeMae).value = (getRandomElement(nomesProprios) || "Mae Teste").split(" ")[0] + " " + (getRandomElement(sobrenomes) || "SobrenomeMae");
-    document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento).value = getRandomDate(new Date(1950, 0, 1), new Date(2005, 11, 31)); 
+    document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento).value = getRandomDate(new Date(1950, 0, 1), new Date(2005, 11, 31));
     document.getElementById(FORM_ELEMENT_IDS.pacCartaoSUS).value = getRandomNumberString(15);
 
     const selectServicoTipoEl = document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo);
     if (selectServicoTipoEl) {
         selectServicoTipoEl.value = servicoDesejado;
-        atualizarCamposPersonalizados(); 
+        atualizarCamposPersonalizados();
     } else {
         console.error("Elemento selectServicoTipo não encontrado.");
         return;
@@ -302,9 +299,9 @@ async function preencherFormularioParaTeste(servicoDesejado) {
                     case "textarea":
                         el.value = getRandomLorem(10 + Math.floor(Math.random() * 20));
                         break;
-                    case "text": 
+                    case "text":
                         if (campoConfig.isDateInput) {
-                            el.value = getRandomDate(new Date(2023, 0, 1), new Date(2025, 11, 31)); 
+                            el.value = getRandomDate(new Date(2023, 0, 1), new Date(2025, 11, 31));
                         } else {
                             el.value = "Valor de Teste " + getRandomString(8);
                         }
