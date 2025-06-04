@@ -3,11 +3,12 @@ import {
     CHAVE_MEDICO_SELECIONADO,
     FORM_ELEMENT_IDS,
     CLOUD_FUNCTION_URL,
-    MEDICOS, // Import MEDICOS
-    CAMPOS_DINAMICOS_POR_SERVICO, // Import for dynamic fields
+    MEDICOS,
+    CAMPOS_DINAMICOS_POR_SERVICO,
     CIRURGIOES,
     OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA,
-    OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO
+    OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO,
+    OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA
 } from './config.js';
 import {
     popularDropdownMedicos,
@@ -17,27 +18,80 @@ import {
     coletarDadosDoFormulario,
     exibirMensagemStatus,
     exibirLinkDocumento,
-    limparResultado,
+    limparFormularioCompleto,
     carregarDadosCID,
-    cidDataGlobal // Assuming cidDataGlobal is exported from ui.js or accessible
+    cidDataGlobal
 } from './ui.js';
+import { formatarDataParaDisplay } from './utils.js';
+
+
+function validarFormatoData(dataStr, nomeCampo) {
+    if (!dataStr.trim()) return true; // Permite campos de data opcionais não preenchidos
+    const regexData = /^(\d{2})\/(\d{2})\/(\d{4})$/; // Estritamente DD/MM/YYYY
+    const match = dataStr.match(regexData);
+
+    if (!match) {
+        exibirMensagemStatus(`ERRO: Formato da ${nomeCampo} inválido. Use dia/mês/ano.`, 'erro');
+        return false;
+    }
+
+    const dia = parseInt(match[1], 10);
+    const mes = parseInt(match[2], 10);
+    const ano = parseInt(match[3], 10);
+
+    if (ano < 1900 || ano > new Date().getFullYear() + 5) { // Permite algum buffer para datas futuras
+        exibirMensagemStatus(`ERRO: Ano da ${nomeCampo} inválido.`, 'erro');
+        return false;
+    }
+    if (mes < 1 || mes > 12) {
+        exibirMensagemStatus(`ERRO: Mês da ${nomeCampo} inválido.`, 'erro');
+        return false;
+    }
+    const diasNoMes = new Date(ano, mes, 0).getDate();
+    if (dia < 1 || dia > diasNoMes) {
+        exibirMensagemStatus(`ERRO: Dia da ${nomeCampo} inválido para o mês/ano.`, 'erro');
+        return false;
+    }
+    return true;
+}
+
 
 async function chamarCloudFunctionGerarDocumento() {
-    limparResultado();
     exibirMensagemStatus('Iniciando processo de geração de documentos...', 'info', true);
 
     exibirMensagemStatus('Verificando dados inseridos...', 'info');
-    const dadosForm = coletarDadosDoFormulario();
+    const dadosForm = coletarDadosDoFormulario(); // Dados já são coletados no formato DD/MM/YYYY onde aplicável
 
+    // Validações
     if (!dadosForm.medico.id) {
         exibirMensagemStatus("ERRO: Por favor, selecione um médico solicitante.", 'erro'); return;
-    }
-    if (!dadosForm.servico.tipo) {
-        exibirMensagemStatus("ERRO: Por favor, selecione o Tipo de Serviço.", 'erro'); return;
     }
     if (!dadosForm.paciente.nome_social) {
         exibirMensagemStatus("ERRO: Por favor, preencha o Nome do Paciente.", 'erro'); return;
     }
+    if (!document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento)?.value.trim()) {
+         exibirMensagemStatus("ERRO: Data de Nascimento é obrigatória.", 'erro');
+         return;
+    }
+    if (!validarFormatoData(dadosForm.paciente.data_nascimento, "Data de Nascimento")) {
+        return;
+    }
+    if (!dadosForm.servico.tipo) {
+        exibirMensagemStatus("ERRO: Por favor, selecione o Tipo de Serviço.", 'erro'); return;
+    }
+
+    // Validar outras datas dinâmicas
+    const camposServicoAtual = CAMPOS_DINAMICOS_POR_SERVICO[dadosForm.servico.tipo] || [];
+    for (const campo of camposServicoAtual) {
+        if (campo.tipo === "text" && campo.label.toLowerCase().includes("data")) { // Assumindo que campos de data em texto têm "data" no label
+            const valorCampoData = document.getElementById(campo.id)?.value;
+            if (valorCampoData && !validarFormatoData(valorCampoData, campo.label)) return;
+        } else if (campo.tipo === "date") { // Para campos <input type="date">, o valor já foi formatado para DD/MM/YYYY em coletarDadosDoFormulario
+             const valorCampoData = dadosForm.campos_dinamicos[campo.placeholder_template]; // Acessa o valor já formatado
+             if (valorCampoData && !validarFormatoData(valorCampoData, campo.label)) return;
+        }
+    }
+
 
     if (dadosForm.servico.tipo === "Marcapassos" && !dadosForm.campos_dinamicos.cirurgia_proposta) {
         exibirMensagemStatus("ERRO: Por favor, selecione a Cirurgia Proposta para Marcapassos.", 'erro'); return;
@@ -46,10 +100,16 @@ async function chamarCloudFunctionGerarDocumento() {
         if (!dadosForm.campos_dinamicos.cirurgia_proposta) {
             exibirMensagemStatus("ERRO: Por favor, selecione a Cirurgia Proposta para Eletrofisiologia.", 'erro'); return;
         }
-        if (!dadosForm.campos_dinamicos.codigo_cid) { 
+        if (!dadosForm.campos_dinamicos.codigo_cid) {
             exibirMensagemStatus("ERRO: Por favor, selecione o CID para Eletrofisiologia.", 'erro'); return;
         }
     }
+    if (dadosForm.servico.tipo === "Cirurgia Cardíaca") {
+        if (!dadosForm.campos_dinamicos.cirurgia_proposta && !dadosForm.campos_dinamicos.cirurgia_proposta_aviso) {
+            exibirMensagemStatus("ERRO: Preencha pelo menos um dos campos de 'Cirurgia Proposta' para Cirurgia Cardíaca.", 'erro'); return;
+        }
+    }
+
 
     exibirMensagemStatus('Dados confirmados.', 'info');
     console.log("Dados enviados para a Cloud Function:", JSON.stringify(dadosForm, null, 2));
@@ -60,6 +120,7 @@ async function chamarCloudFunctionGerarDocumento() {
         return;
     }
     exibirMensagemStatus('Solicitação enviada ao servidor. Processando...', 'info');
+    document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento).disabled = true;
 
     try {
         const response = await fetch(CLOUD_FUNCTION_URL, {
@@ -97,6 +158,10 @@ async function chamarCloudFunctionGerarDocumento() {
     } catch (error) {
         console.error("Erro ao chamar Cloud Function:", error);
         exibirMensagemStatus(`Erro de comunicação com o servidor: ${error.message}`, 'erro');
+    } finally {
+        document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento).disabled = false;
+        limparFormularioCompleto(); // Limpa o formulário após a tentativa de gerar
+        exibirMensagemStatus("Formulário limpo após a operação. Pronto para nova entrada.", "info");
     }
 }
 
@@ -158,10 +223,14 @@ function getRandomNumberString(length) {
     return result;
 }
 
-function getRandomDate(start, end) {
+function getRandomDateForTest(start, end) {
     const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-    return date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+    const dia = String(date.getDate()).padStart(2, '0');
+    const mes = String(date.getMonth() + 1).padStart(2, '0');
+    const ano = date.getFullYear();
+    return `${dia}/${mes}/${ano}`;
 }
+
 
 function getRandomBoolean() {
     return Math.random() < 0.5;
@@ -182,42 +251,33 @@ const sobrenomes = ["Silva", "Santos", "Oliveira", "Costa", "Pereira", "Rodrigue
 
 async function preencherFormularioParaTeste(servicoDesejado) {
     console.log(`Iniciando preenchimento de teste para o serviço: ${servicoDesejado}`);
+    limparFormularioCompleto();
 
-    // 1. Médico Solicitante
     const selectMedicoEl = document.getElementById(FORM_ELEMENT_IDS.selectMedico);
     if (selectMedicoEl && MEDICOS.length > 0) {
         const medicoAleatorio = getRandomElement(MEDICOS);
         selectMedicoEl.value = medicoAleatorio.id;
+        salvarMedicoSelecionado(CHAVE_MEDICO_SELECIONADO);
     }
 
-    // 2. Dados do Paciente
     document.getElementById(FORM_ELEMENT_IDS.pacProntuario).value = getRandomNumberString(7);
     document.getElementById(FORM_ELEMENT_IDS.pacNomeSocial).value = getRandomElement(nomesProprios);
     document.getElementById(FORM_ELEMENT_IDS.pacSexo).value = getRandomElement(["Masculino", "Feminino", "Outro"]);
     document.getElementById(FORM_ELEMENT_IDS.pacNomeMae).value = getRandomElement(nomesProprios).split(" ")[0] + " " + getRandomElement(sobrenomes);
-    document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento).value = getRandomDate(new Date(1950, 0, 1), new Date(2005, 11, 31));
+    document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento).value = getRandomDateForTest(new Date(1950, 0, 1), new Date(2005, 11, 31));
     document.getElementById(FORM_ELEMENT_IDS.pacCartaoSUS).value = getRandomNumberString(15);
 
-    // 3. Tipo de Serviço
     const selectServicoTipoEl = document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo);
     if (selectServicoTipoEl) {
         selectServicoTipoEl.value = servicoDesejado;
-        // Trigger change to load dynamic fields. Direct call to atualizarCamposPersonalizados also works.
-        selectServicoTipoEl.dispatchEvent(new Event('change'));
-        // It might be safer to call atualizarCamposPersonalizados directly if event dispatch has timing issues
-        // await new Promise(resolve => setTimeout(resolve, 0)); // allow DOM update
-        // ou:
-        // atualizarCamposPersonalizados(); // Called by the event listener anyway
+        atualizarCamposPersonalizados();
     } else {
         console.error("Elemento selectServicoTipo não encontrado.");
         return;
     }
-    
-    // Give a brief moment for conditional UI updates if any are async (though ours is mostly sync)
-    await new Promise(resolve => setTimeout(resolve, 50));
 
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 4. Campos Personalizados (Dinâmicos)
     const camposParaServico = CAMPOS_DINAMICOS_POR_SERVICO[servicoDesejado];
     if (camposParaServico && camposParaServico.length > 0) {
         camposParaServico.forEach(campoConfig => {
@@ -225,22 +285,26 @@ async function preencherFormularioParaTeste(servicoDesejado) {
             if (el) {
                 switch (campoConfig.tipo) {
                     case "textarea":
-                        el.value = getRandomLorem(10 + Math.floor(Math.random() * 20)); // 10-29 words
+                        el.value = getRandomLorem(10 + Math.floor(Math.random() * 20));
                         break;
-                    case "date":
-                        el.value = getRandomDate(new Date(2024, 0, 1), new Date(2025, 11, 31));
+                    case "date": // Mantido como date, mas a coleta tratará
+                        const randomDateObj = new Date(new Date(2024, 0, 1).getTime() + Math.random() * (new Date(2025, 11, 31).getTime() - new Date(2024, 0, 1).getTime()));
+                        el.value = randomDateObj.toISOString().split('T')[0]; // Formato YYYY-MM-DD para o input date
                         break;
                     case "text":
-                        el.value = "Valor de Teste " + getRandomString(8);
+                         if (campoConfig.label.toLowerCase().includes("data")){ // para os campos de data que são text
+                            el.value = getRandomDateForTest(new Date(2024,0,1), new Date(2025,11,31));
+                         } else {
+                            el.value = "Valor de Teste " + getRandomString(8);
+                         }
                         break;
                     case "select":
                         const options = el.querySelectorAll('option');
-                        if (options.length > 1) { // Has more than just the default "Selecione..."
-                            // Select a random option, skipping the first if it's a placeholder
+                        if (options.length > 1) {
                             const randomIndex = Math.floor(Math.random() * (options.length -1)) + 1;
                             el.value = options[randomIndex].value;
                         } else if (options.length === 1 && options[0].value !== "") {
-                            el.value = options[0].value; // If only one valid option
+                            el.value = options[0].value;
                         }
                         break;
                 }
@@ -254,14 +318,11 @@ async function preencherFormularioParaTeste(servicoDesejado) {
                     if (triggerInput) triggerInput.value = `${randomCID.code} - ${randomCID.description}`;
                     if (hiddenCodeInput) hiddenCodeInput.value = randomCID.code;
                     if (hiddenDescriptionInput) hiddenDescriptionInput.value = randomCID.description;
-                } else {
-                    console.warn("cidDataGlobal não está populado. Campo CID não preenchido.");
                 }
             }
         });
     }
 
-    // 5. Pedidos de Exames
     const exameECGCheckbox = document.getElementById('exameECG');
     if (exameECGCheckbox) exameECGCheckbox.checked = getRandomBoolean();
 
@@ -275,5 +336,4 @@ async function preencherFormularioParaTeste(servicoDesejado) {
     exibirMensagemStatus(`Formulário preenchido para teste do serviço: ${servicoDesejado}.`, 'info');
 }
 
-// Expose the function to the window object so it can be called from the browser console
 window.preencherFormularioParaTeste = preencherFormularioParaTeste;

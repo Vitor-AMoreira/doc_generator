@@ -96,17 +96,16 @@ export const OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA = [
 export const OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA = [
     {
         value: "0211020010_CCE",
-        display: "CATETERISMO CARDIACO ESQUERDO",
+        display: "CATETERISMO CARDIACO ESQUERDO (PRIORIZAÇÃO)",
         tuss: "0211020010",
         fullOriginalString: "0211020010;CATETERISMO CARDIACO ESQUERDO (CATETERISMO CARDIACO ESQUERDO)"
     },
     {
         value: "0211020010_CCD",
-        display: "CATETERISMO CARDIACO DIREITO",
+        display: "CATETERISMO CARDIACO DIREITO (PRIORIZAÇÃO)",
         tuss: "0211020010",
         fullOriginalString: "0211020010;CATETERISMO CARDIACO DIREITO (CATETERISMO CARDIACO DIREITO)"
     },
-    // Você pode adicionar mais opções aqui se necessário
 ];
 
 
@@ -121,14 +120,14 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cirurgia_aviso_eletivo_mp",
             label: "Data da Cirurgia:",
-            tipo: "date",
+            tipo: "text", // Alterado para text para consistência de formato
             placeholder_template: "data_cirurgia"
         },
         {
             id: "diagnostico_aviso_eletivo_mp",
             label: "Diagnóstico (Marcapasso):",
             tipo: "text",
-            placeholder_template: "diagnostico" // Este 'diagnostico' é para Marcapasso
+            placeholder_template: "diagnostico"
         },
         {
             id: "cirurgia_proposta_aviso_eletivo_mp",
@@ -155,22 +154,34 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         },
         {
             id: "data_cirurgia_aviso_eletivo_cc",
-            label: "Data da Cirurgia:",
-            tipo: "date",
-            placeholder_template: "data_cirurgia"
+            label: "Data da Cirurgia (Aviso Eletivo):",
+            tipo: "text", // Alterado para text
+            placeholder_template: "data_cirurgia_aviso"
         },
-        { // Campo de Diagnóstico como texto, como era antes
+        {
             id: "diagnostico_aviso_eletivo_cc",
             label: "Diagnóstico:",
             tipo: "text",
             placeholder_template: "diagnostico"
         },
-        { 
-            id: "cirurgia_proposta_aviso_eletivo_cc",
-            label: "Cirurgia Proposta:",
+        {
+            id: "cirurgia_proposta_priorizacao_cc",
+            label: "Cirurgia Proposta (Priorização):",
             tipo: "select",
             opcoes_dropdown: OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA,
-            placeholder_template: "cirurgia_proposta" // Placeholder para o template
+            placeholder_template: "cirurgia_proposta"
+        },
+        {
+            id: "cirurgia_proposta_aviso_texto_cc",
+            label: "Cirurgia Proposta (Aviso Eletivo):",
+            tipo: "text",
+            placeholder_template: "cirurgia_proposta_aviso"
+        },
+        {
+            id: "data_cateterismo_cc",
+            label: "Data do Cateterismo (Aviso Hemodinâmica):",
+            tipo: "text", // Alterado para text
+            placeholder_template: "data_cateterismo"
         },
         {
             id: "cirurgiao_aviso_eletivo_cc",
@@ -186,20 +197,20 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             id: "detalhes_priorizacao_ef",
             label: "Condição Clínica:",
             tipo: "textarea",
-            placeholder_template: "campo_personalizado" 
+            placeholder_template: "condicao_clinica"
         },
         {
             id: "data_cirurgia_aviso_eletivo_ef",
             label: "Data da Cirurgia:",
-            tipo: "date",
+            tipo: "text", // Alterado para text
             placeholder_template: "data_cirurgia"
         },
         {
             id: "cid_selecionado_ef",
             label: "CID:",
             tipo: "cid_custom_select",
-            placeholder_template_codigo: "codigo_cid", 
-            placeholder_template_descricao: "descricao_cid" 
+            placeholder_template_codigo: "codigo_cid",
+            placeholder_template_descricao: "descricao_cid"
         },
         {
             id: "cirurgia_proposta_aviso_eletivo_ef",

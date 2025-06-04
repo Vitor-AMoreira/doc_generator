@@ -19,17 +19,17 @@ ID_PASTA_RAIZ_GERADOR_FIXO = "1uBlptVoSpPCqWkKKZB7wyyVq--tsJ1nf" # ID da pasta p
 
 DOCUMENTOS_POR_SERVICO = {
     "Marcapassos": [
-        {"nome_documento_logico": "Priorizacao_Marcapasso", "template_id": "1NpRDSnzqvarzjF_H2Ykg1hpxI61az-SiD4OUCnaPkvQ"},
+        {"nome_documento_logico": "Priorizacao_Marcapasso", "template_id": "1XqCtQtAcvKJidVzK272VDrU1ViujK7ijxXpkKTY5eYQ"},
         {"nome_documento_logico": "Aviso_Eletivo_Marcapasso", "template_id": "1mT8_xHTuuMn1uKkVae2_c8cH41PSavFuleqKLE6WxhE"}
     ],
     "Eletrofisiologia": [
         {"nome_documento_logico": "Lista_Material_Eletrofisiologia", "template_id": "1hSWY4TztveMj6Y7cduW_YBGg2FIRq5tM204RsH_oiQw"},
         {"nome_documento_logico": "Aviso_Hemodinamica_Eletrofisiologia", "template_id": "1AVDcc67hy7aaCcuNt1EYaJk25J2QErKyNwIoBsfGOiY"},
-        {"nome_documento_logico": "Priorizacao_Eletrofisiologia", "template_id": "1NpRDSnzqvarzjF_H2Ykg1hpxI61az-SiD4OUCnaPkvQ"}
+        {"nome_documento_logico": "Priorizacao_Eletrofisiologia", "template_id": "1XqCtQtAcvKJidVzK272VDrU1ViujK7ijxXpkKTY5eYQ"}
     ],
     "Cirurgia Cardíaca": [
         {"nome_documento_logico": "Aviso_Hemodinamica_Cirurgia_Cardiaca", "template_id": "1AVDcc67hy7aaCcuNt1EYaJk25J2QErKyNwIoBsfGOiY"},
-        {"nome_documento_logico": "Priorizacao_Cirurgia_Cardiaca", "template_id": "1NpRDSnzqvarzjF_H2Ykg1hpxI61az-SiD4OUCnaPkvQ"},
+        {"nome_documento_logico": "Priorizacao_Cirurgia_Cardiaca", "template_id": "1XqCtQtAcvKJidVzK272VDrU1ViujK7ijxXpkKTY5eYQ"},
         {"nome_documento_logico": "Aviso_Eletivo_Cirurgia_Cardiaca", "template_id": "1mT8_xHTuuMn1uKkVae2_c8cH41PSavFuleqKLE6WxhE"}
     ]
 }

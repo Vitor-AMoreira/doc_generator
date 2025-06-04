@@ -5,12 +5,15 @@ import {
     FORM_ELEMENT_IDS,
     OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA,
     OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO,
-    OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA, // Importar a nova lista
+    OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA,
     CIRURGIOES,
     CID_CSV_PATH,
     CIDS_PER_PAGE,
-    INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA
+    INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA,
+    CHAVE_MEDICO_SELECIONADO
 } from './config.js';
+import { formatarDataParaTemplate } from './utils.js';
+
 
 export let cidDataGlobal = [];
 let currentCIDPage = 1;
@@ -21,7 +24,7 @@ const DOMElements = {
     selectServicoTipo: document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo),
     containerCamposPersonalizados: document.getElementById(FORM_ELEMENT_IDS.containerCamposPersonalizados),
     statusMessages: document.getElementById(FORM_ELEMENT_IDS.statusMessages),
-    // outputLink: document.getElementById(FORM_ELEMENT_IDS.outputLink) // Removido ou não utilizado
+    medicalDocForm: document.getElementById('medicalDocForm')
 };
 
 export async function carregarDadosCID() {
@@ -207,7 +210,7 @@ export function atualizarCamposPersonalizados() {
                 criarCampoCIDCustomizado(DOMElements.containerCamposPersonalizados, campoConfig);
             } else {
                 const divCampo = document.createElement('div');
-                divCampo.className = 'form-group span-full'; // Assumindo span-full, pode precisar de ajuste se não for
+                divCampo.className = 'form-group span-full';
 
                 const label = document.createElement('label');
                 label.setAttribute('for', campoConfig.id);
@@ -235,17 +238,17 @@ export function atualizarCamposPersonalizados() {
                     if (opcoes && opcoes.length > 0) {
                         opcoes.forEach(opcao => {
                             const optionEl = document.createElement('option');
-                            optionEl.value = opcao.value || opcao.id; // 'value' para Eletro/Cardíaca, 'id' para Marcapasso
-                            optionEl.textContent = opcao.display || opcao.name; // 'display' para Eletro/Cardíaca, 'name' para Marcapasso
+                            optionEl.value = opcao.value || opcao.id;
+                            optionEl.textContent = opcao.display || opcao.name;
                             inputElement.appendChild(optionEl);
                         });
                     }
-                } else { // text, date, etc.
+                } else {
                     inputElement = document.createElement('input');
                     inputElement.type = campoConfig.tipo;
                 }
                 inputElement.id = campoConfig.id;
-                inputElement.name = campoConfig.id; // importante para coleta se usar form.elements
+                inputElement.name = campoConfig.id;
 
                 divCampo.appendChild(inputElement);
                 DOMElements.containerCamposPersonalizados.appendChild(divCampo);
@@ -272,7 +275,23 @@ export function coletarDadosDoFormulario() {
     dados.paciente.nome_social = document.getElementById(FORM_ELEMENT_IDS.pacNomeSocial)?.value || "";
     dados.paciente.sexo = document.getElementById(FORM_ELEMENT_IDS.pacSexo)?.value || "";
     dados.paciente.nome_mae = document.getElementById(FORM_ELEMENT_IDS.pacNomeMae)?.value || "";
-    dados.paciente.data_nascimento = document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento)?.value || "";
+
+    const dataNascInput = document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento);
+    if (dataNascInput) {
+        const dataNascValue = dataNascInput.value.trim();
+        if (dataNascValue) {
+            const parts = dataNascValue.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (parts) {
+                dados.paciente.data_nascimento = `${parts[3]}-${parts[2].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+            } else {
+                dados.paciente.data_nascimento = dataNascValue;
+            }
+        } else {
+            dados.paciente.data_nascimento = "";
+        }
+    }
+
+
     dados.paciente.cartao_sus = document.getElementById(FORM_ELEMENT_IDS.pacCartaoSUS)?.value || "";
 
     dados.servico.tipo = DOMElements.selectServicoTipo?.value || "";
@@ -295,7 +314,13 @@ export function coletarDadosDoFormulario() {
             } else {
                 const inputElement = document.getElementById(campoConfig.id);
                 if (inputElement) {
-                    const value = inputElement.value;
+                    let value = inputElement.value;
+                    // Para campos 'date', o backend espera YYYY-MM-DD.
+                    // Se o campo é tipo 'date' no HTML, o .value já vem nesse formato.
+                    // A função formatarDataParaTemplate é para converter YYYY-MM-DD para DD/MM/YYYY para templates.
+                    // O backend deve lidar com YYYY-MM-DD diretamente para datas.
+                    // A única exceção é pacDataNascimento que é text, já tratado acima.
+                    // Para campos date dinâmicos, o backend os recebe como YYYY-MM-DD.
 
                     if (tipoServicoSelecionado === "Eletrofisiologia" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_ef") {
                         const selectedValue = value;
@@ -307,17 +332,21 @@ export function coletarDadosDoFormulario() {
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = "";
                         }
-                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_cc") {
+                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "cirurgia_proposta_priorizacao_cc") {
                         const selectedValue = value;
                         const cirurgiaSelecionada = OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA.find(c => c.value === selectedValue);
                         if (cirurgiaSelecionada) {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionada.display;
-                            dados.campos_dinamicos.procedimento = cirurgiaSelecionada.fullOriginalString.split(";")[1].split(" (")[0].trim();
-                            dados.campos_dinamicos.procedimento_codigo = cirurgiaSelecionada.tuss;
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = "";
                         }
-                    } else if (tipoServicoSelecionado === "Marcapassos" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_mp") {
+                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "cirurgia_proposta_aviso_texto_cc") {
+                        dados.campos_dinamicos[campoConfig.placeholder_template] = value;
+                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "data_cateterismo_cc") {
+                        dados.campos_dinamicos[campoConfig.placeholder_template] = value; // Envia YYYY-MM-DD
+                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "data_cirurgia_aviso_eletivo_cc"){
+                        dados.campos_dinamicos[campoConfig.placeholder_template] = value; // Envia YYYY-MM-DD
+                    }else if (tipoServicoSelecionado === "Marcapassos" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_mp") {
                         const selectedCirurgiaId = value;
                         const cirurgiaSelecionadaObj = OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO.find(c => c.id === selectedCirurgiaId);
                         if (cirurgiaSelecionadaObj) {
@@ -345,37 +374,28 @@ export function coletarDadosDoFormulario() {
                              dados.campos_dinamicos[campoConfig.placeholder_template_nome] = "";
                              dados.campos_dinamicos[campoConfig.placeholder_template_crm] = "";
                         }
-                    } else if (campoConfig.placeholder_template) { // Campos genéricos com placeholder_template
+                    } else if (campoConfig.placeholder_template) {
                         if (inputElement.tagName === 'SELECT' && !campoConfig.placeholder_template_nome) {
                              const selectedOption = inputElement.options[inputElement.selectedIndex];
                              dados.campos_dinamicos[campoConfig.placeholder_template] = selectedOption ? selectedOption.text : "";
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = value;
                         }
-                    } else {
+                    } else { // Caso genérico para campos que não têm placeholder_template direto (raro)
                         dados.campos_dinamicos[campoConfig.id] = value;
                     }
                 }
             }
         });
     }
+    // Adiciona campo 'diagnostico' para Eletrofisiologia, copiando de 'condicao_clinica' (que usa placeholder 'campo_personalizado')
+    if (tipoServicoSelecionado === "Eletrofisiologia" && dados.campos_dinamicos.campo_personalizado) {
+        dados.campos_dinamicos.diagnostico = dados.campos_dinamicos.campo_personalizado;
+    }
+
 
     if (tipoServicoSelecionado === "Cirurgia Cardíaca") {
-        // Os campos de instrumental e materiais para Cirurgia Cardíaca são fixos e adicionados aqui.
-        // A lógica para preenchê-los com base na 'cirurgia_proposta_aviso_eletivo_cc'
-        // não foi solicitada da mesma forma que para Marcapasso, então mantemos a atribuição direta.
-        // Se precisar ser dinâmico com base na cirurgia, a estrutura de OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA
-        // e a lógica aqui precisariam ser expandidas como no caso de Marcapasso.
-        dados.campos_dinamicos.pre_operatorio = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.pre_operatorio;
-        dados.campos_dinamicos.instrumental_cirurgico = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.instrumental_cirurgico;
-        dados.campos_dinamicos.materiais_consignados = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.materiais_consignados;
-        dados.campos_dinamicos.empresa_consignados = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.empresa_consignados;
-        dados.campos_dinamicos.fios_cirurgicos = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.fios_cirurgicos;
-        dados.campos_dinamicos.bist_eletrico = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.bist_eletrico;
-        dados.campos_dinamicos.torre_video = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.torre_video;
-        dados.campos_dinamicos.ultrassom = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.ultrassom;
-        dados.campos_dinamicos.tca = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.tca;
-        dados.campos_dinamicos.eco_trans = INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA.eco_trans;
+        Object.assign(dados.campos_dinamicos, INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA);
     }
 
 
@@ -423,16 +443,48 @@ export function exibirMensagemStatus(mensagem, tipo = 'info', limparAnteriores =
 export function exibirLinkDocumento(texto, link) {
     let mensagemHtml = texto;
     if (link) {
-        mensagemHtml += `: <a href="${link}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline;">${link}</a>`;
+        mensagemHtml += `: <a href="${link}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline;">Acessar Documento</a>`;
     }
     exibirMensagemStatus(mensagemHtml, 'info');
 }
 
-export function limparResultado() {
-    const outputLinkEl = document.getElementById(FORM_ELEMENT_IDS.outputLink);
-    if (outputLinkEl) { // Verifica se o elemento existe
-        outputLinkEl.innerHTML = "";
-        outputLinkEl.style.display = 'none';
+export function limparFormularioCompleto() {
+    if (DOMElements.medicalDocForm) {
+        DOMElements.medicalDocForm.reset();
     }
-    // Não limpa statusMessages aqui, é controlado por exibirMensagemStatus
+    localStorage.removeItem(CHAVE_MEDICO_SELECIONADO);
+    
+    if(DOMElements.selectMedico) DOMElements.selectMedico.value = "";
+    if(DOMElements.selectServicoTipo) DOMElements.selectServicoTipo.value = "";
+
+    atualizarCamposPersonalizados();
+    
+    const camposDinamicos = CAMPOS_DINAMICOS_POR_SERVICO[DOMElements.selectServicoTipo?.value] || [];
+    camposDinamicos.forEach(campoConfig => {
+        if (campoConfig.tipo === "cid_custom_select") {
+            const triggerInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomTriggerSuffix);
+            const hiddenCodeInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenCodeSuffix);
+            const hiddenDescriptionInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenDescriptionSuffix);
+            const panel = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomPanelSuffix);
+            const listElement = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomListSuffix);
+
+
+            if (triggerInput) triggerInput.value = "";
+            if (hiddenCodeInput) hiddenCodeInput.value = "";
+            if (hiddenDescriptionInput) hiddenDescriptionInput.value = "";
+            if (panel) panel.style.display = 'none';
+            if (listElement) listElement.innerHTML = '';
+        }
+    });
+    
+    // Limpa as mensagens de status, exceto a de formulário limpo.
+    if (DOMElements.statusMessages) {
+        const mensagens = DOMElements.statusMessages.querySelectorAll('p');
+        mensagens.forEach(msg => {
+            if (!msg.textContent.includes('Formulário e cache limpos')) {
+                msg.remove();
+            }
+        });
+    }
+    exibirMensagemStatus('Formulário e cache limpos.', 'info', true);
 }

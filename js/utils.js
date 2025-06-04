@@ -1,5 +1,5 @@
 // js/utils.js
-export function calcularIdade(dataNascimento) {
+export function calcularIdade(dataNascimento) { // dataNascimento no formato YYYY-MM-DD
     if (!dataNascimento) return "";
     const hoje = new Date();
     const nasc = new Date(dataNascimento);
@@ -16,17 +16,18 @@ export function obterDataAtualFormatada() {
     const hoje = new Date();
     return {
         dia: hoje.getDate().toString().padStart(2, '0'),
-        mes: (hoje.getMonth() + 1).toString().padStart(2, '0'), // Meses são 0-indexados
+        mes: (hoje.getMonth() + 1).toString().padStart(2, '0'),
         ano: hoje.getFullYear().toString(),
         completa: hoje.toLocaleDateString('pt-BR') // ex: 17/05/2025
     };
 }
 
-export function formatarDataParaTemplate(dataString) { // Espera "YYYY-MM-DD"
-    if (!dataString) return "";
-    const partes = dataString.split('-');
-    if (partes.length === 3) {
-        return `${partes[2]}/${partes[1]}/${partes[0]}`; // Formato DD/MM/YYYY
+// Converte YYYY-MM-DD para DD/MM/YYYY
+export function formatarDataParaDisplay(dataStringYYYYMMDD) {
+    if (!dataStringYYYYMMDD) return "";
+    const partes = dataStringYYYYMMDD.split('-');
+    if (partes.length === 3 && partes[0].length === 4) { // Verifica se está no formato YYYY-MM-DD
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
     }
-    return dataString; // Retorna original se não estiver no formato esperado
+    return dataStringYYYYMMDD; // Retorna original se não estiver no formato esperado
 }
