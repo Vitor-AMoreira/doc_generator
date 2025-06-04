@@ -12,7 +12,6 @@ import {
     INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA,
     CHAVE_MEDICO_SELECIONADO
 } from './config.js';
-import { formatarDataParaTemplate } from './utils.js';
 
 
 export let cidDataGlobal = [];
@@ -315,12 +314,6 @@ export function coletarDadosDoFormulario() {
                 const inputElement = document.getElementById(campoConfig.id);
                 if (inputElement) {
                     let value = inputElement.value;
-                    // Para campos 'date', o backend espera YYYY-MM-DD.
-                    // Se o campo é tipo 'date' no HTML, o .value já vem nesse formato.
-                    // A função formatarDataParaTemplate é para converter YYYY-MM-DD para DD/MM/YYYY para templates.
-                    // O backend deve lidar com YYYY-MM-DD diretamente para datas.
-                    // A única exceção é pacDataNascimento que é text, já tratado acima.
-                    // Para campos date dinâmicos, o backend os recebe como YYYY-MM-DD.
 
                     if (tipoServicoSelecionado === "Eletrofisiologia" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_ef") {
                         const selectedValue = value;

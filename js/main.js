@@ -22,7 +22,6 @@ import {
     carregarDadosCID,
     cidDataGlobal
 } from './ui.js';
-import { formatarDataParaDisplay } from './utils.js';
 
 
 function validarFormatoData(dataStr, nomeCampo) {
