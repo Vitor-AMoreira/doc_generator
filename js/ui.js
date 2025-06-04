@@ -12,6 +12,7 @@ import {
     INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA,
     CHAVE_MEDICO_SELECIONADO
 } from './config.js';
+import { parseAndFormatDate_DDMMYYYY_to_YYYYMMDD } from './utils.js';
 
 
 export let cidDataGlobal = [];
@@ -242,9 +243,12 @@ export function atualizarCamposPersonalizados() {
                             inputElement.appendChild(optionEl);
                         });
                     }
-                } else {
+                } else { 
                     inputElement = document.createElement('input');
                     inputElement.type = campoConfig.tipo;
+                    if (campoConfig.placeholder) { 
+                        inputElement.placeholder = campoConfig.placeholder;
+                    }
                 }
                 inputElement.id = campoConfig.id;
                 inputElement.name = campoConfig.id;
@@ -278,16 +282,7 @@ export function coletarDadosDoFormulario() {
     const dataNascInput = document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento);
     if (dataNascInput) {
         const dataNascValue = dataNascInput.value.trim();
-        if (dataNascValue) {
-            const parts = dataNascValue.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-            if (parts) {
-                dados.paciente.data_nascimento = `${parts[3]}-${parts[2].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
-            } else {
-                dados.paciente.data_nascimento = dataNascValue;
-            }
-        } else {
-            dados.paciente.data_nascimento = "";
-        }
+        dados.paciente.data_nascimento = parseAndFormatDate_DDMMYYYY_to_YYYYMMDD(dataNascValue);
     }
 
 
@@ -308,15 +303,24 @@ export function coletarDadosDoFormulario() {
                     dados.campos_dinamicos[campoConfig.placeholder_template_codigo] = hiddenCodeInput.value;
                 }
                 if (hiddenDescriptionInput && campoConfig.placeholder_template_descricao) {
-                    dados.campos_dinamicos[campoConfig.placeholder_template_descricao] = hiddenDescriptionInput.value;
+                    if (tipoServicoSelecionado === "Marcapassos" && campoConfig.placeholder_template_descricao === "diagnostico") {
+                        dados.campos_dinamicos.diagnostico = hiddenDescriptionInput.value;
+                    } else {
+                        dados.campos_dinamicos[campoConfig.placeholder_template_descricao] = hiddenDescriptionInput.value;
+                    }
                 }
             } else {
                 const inputElement = document.getElementById(campoConfig.id);
                 if (inputElement) {
-                    let value = inputElement.value;
+                    let originalValue = inputElement.value;
+                    let valueToStore = originalValue;
 
+                    if (campoConfig.isDateInput === true && campoConfig.tipo === 'text' && originalValue.trim()) {
+                        valueToStore = parseAndFormatDate_DDMMYYYY_to_YYYYMMDD(originalValue);
+                    }
+                    
                     if (tipoServicoSelecionado === "Eletrofisiologia" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_ef") {
-                        const selectedValue = value;
+                        const selectedValue = originalValue;
                         const cirurgiaSelecionada = OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA.find(c => c.value === selectedValue);
                         if (cirurgiaSelecionada) {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionada.display;
@@ -326,24 +330,18 @@ export function coletarDadosDoFormulario() {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = "";
                         }
                     } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "cirurgia_proposta_priorizacao_cc") {
-                        const selectedValue = value;
+                        const selectedValue = originalValue;
                         const cirurgiaSelecionada = OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA.find(c => c.value === selectedValue);
                         if (cirurgiaSelecionada) {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionada.display;
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = "";
                         }
-                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "cirurgia_proposta_aviso_texto_cc") {
-                        dados.campos_dinamicos[campoConfig.placeholder_template] = value;
-                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "data_cateterismo_cc") {
-                        dados.campos_dinamicos[campoConfig.placeholder_template] = value; 
-                    } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "data_cirurgia_aviso_eletivo_cc"){
-                        dados.campos_dinamicos[campoConfig.placeholder_template] = value; 
-                    }else if (tipoServicoSelecionado === "Marcapassos" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_mp") {
-                        const selectedCirurgiaId = value;
+                    } else if (tipoServicoSelecionado === "Marcapassos" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_mp") {
+                        const selectedCirurgiaId = originalValue; 
                         const cirurgiaSelecionadaObj = OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO.find(c => c.id === selectedCirurgiaId);
                         if (cirurgiaSelecionadaObj) {
-                            dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionadaObj.name;
+                            dados.campos_dinamicos[campoConfig.placeholder_template] = cirurgiaSelecionadaObj.name; 
                             dados.campos_dinamicos.pre_operatorio = cirurgiaSelecionadaObj.pre_operatorio;
                             dados.campos_dinamicos.instrumental_cirurgico = cirurgiaSelecionadaObj.instrumental_cirurgico;
                             dados.campos_dinamicos.materiais_consignados = cirurgiaSelecionadaObj.materiais_consignados;
@@ -358,7 +356,7 @@ export function coletarDadosDoFormulario() {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = "";
                         }
                     } else if (campoConfig.tipo === "select" && campoConfig.placeholder_template_nome && campoConfig.placeholder_template_crm) { 
-                        const selectedCirurgiaoId = value;
+                        const selectedCirurgiaoId = originalValue;
                         const cirurgiaoObj = CIRURGIOES.find(c => c.id === selectedCirurgiaoId);
                         if (cirurgiaoObj) {
                             dados.campos_dinamicos[campoConfig.placeholder_template_nome] = cirurgiaoObj.name;
@@ -368,14 +366,14 @@ export function coletarDadosDoFormulario() {
                              dados.campos_dinamicos[campoConfig.placeholder_template_crm] = "";
                         }
                     } else if (campoConfig.placeholder_template) {
-                        if (inputElement.tagName === 'SELECT' && !campoConfig.placeholder_template_nome) {
+                        if (inputElement.tagName === 'SELECT') { 
                              const selectedOption = inputElement.options[inputElement.selectedIndex];
                              dados.campos_dinamicos[campoConfig.placeholder_template] = selectedOption ? selectedOption.text : "";
-                        } else {
-                            dados.campos_dinamicos[campoConfig.placeholder_template] = value;
+                        } else { 
+                            dados.campos_dinamicos[campoConfig.placeholder_template] = valueToStore;
                         }
                     } else { 
-                        dados.campos_dinamicos[campoConfig.id] = value;
+                        dados.campos_dinamicos[campoConfig.id] = valueToStore;
                     }
                 }
             }
@@ -383,14 +381,20 @@ export function coletarDadosDoFormulario() {
     }
     
     if (tipoServicoSelecionado === "Eletrofisiologia") {
-        // 'condicao_clinica' (anteriormente 'campo_personalizado') é o placeholder para "Condição Clínica" de Eletrofisiologia
-        // Garante que 'diagnostico' reflita esse valor, mesmo se vazio.
         dados.campos_dinamicos.diagnostico = dados.campos_dinamicos.condicao_clinica || "";
     }
 
 
     if (tipoServicoSelecionado === "Cirurgia Cardíaca") {
         Object.assign(dados.campos_dinamicos, INSTRUMENTAL_MATERIAIS_CIRURGIA_CARDIACA);
+        // Adicionar campo 'procedimento' com base nos campos de cirurgia proposta
+        if (dados.campos_dinamicos.cirurgia_proposta_aviso && dados.campos_dinamicos.cirurgia_proposta_aviso.trim() !== "") {
+            dados.campos_dinamicos.procedimento = dados.campos_dinamicos.cirurgia_proposta_aviso;
+        } else if (dados.campos_dinamicos.cirurgia_proposta && dados.campos_dinamicos.cirurgia_proposta.trim() !== "") {
+            dados.campos_dinamicos.procedimento = dados.campos_dinamicos.cirurgia_proposta;
+        } else {
+            dados.campos_dinamicos.procedimento = ""; 
+        }
     }
 
 
@@ -452,10 +456,11 @@ export function limparFormularioCompleto() {
     if(DOMElements.selectMedico) DOMElements.selectMedico.value = "";
     if(DOMElements.selectServicoTipo) DOMElements.selectServicoTipo.value = "";
 
-    atualizarCamposPersonalizados();
+    atualizarCamposPersonalizados(); 
     
-    const camposDinamicos = CAMPOS_DINAMICOS_POR_SERVICO[DOMElements.selectServicoTipo?.value] || [];
-    camposDinamicos.forEach(campoConfig => {
+    const currentServiceType = DOMElements.selectServicoTipo?.value || ""; 
+    const camposDinamicosConfig = CAMPOS_DINAMICOS_POR_SERVICO[currentServiceType] || [];
+    camposDinamicosConfig.forEach(campoConfig => {
         if (campoConfig.tipo === "cid_custom_select") {
             const triggerInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomTriggerSuffix);
             const hiddenCodeInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenCodeSuffix);
@@ -463,22 +468,15 @@ export function limparFormularioCompleto() {
             const panel = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomPanelSuffix);
             const listElement = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomListSuffix);
 
-
             if (triggerInput) triggerInput.value = "";
             if (hiddenCodeInput) hiddenCodeInput.value = "";
             if (hiddenDescriptionInput) hiddenDescriptionInput.value = "";
             if (panel) panel.style.display = 'none';
-            if (listElement) listElement.innerHTML = '';
+            if (listElement) listElement.innerHTML = ''; 
         }
     });
     
-    if (DOMElements.statusMessages) {
-        const mensagens = DOMElements.statusMessages.querySelectorAll('p');
-        mensagens.forEach(msg => {
-            if (!msg.textContent.includes('Formulário e cache limpos')) {
-                msg.remove();
-            }
-        });
-    }
-    exibirMensagemStatus('Formulário e cache limpos.', 'info', true);
+    // Não limpa mais o DOMElements.statusMessages.innerHTML aqui.
+    // Adiciona uma mensagem informativa sem limpar as anteriores.
+    exibirMensagemStatus('Formulário e cache do médico foram limpos.', 'info');
 }

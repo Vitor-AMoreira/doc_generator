@@ -23,39 +23,33 @@ import {
     cidDataGlobal
 } from './ui.js';
 
-function validarDataNascimento(dataStr) {
-    if (!dataStr.trim()) {
-        exibirMensagemStatus("ERRO: Data de Nascimento é obrigatória.", 'erro');
-        return false;
+function validarData(dataStr, fieldLabel = "Data") {
+    if (!dataStr.trim()) { 
+        return true;
     }
-    // Tenta validar formatos DD/MM/YYYY e DD-MM-YYYY, permitindo 1 ou 2 dígitos para dia/mês
     const regexData = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/;
     const match = dataStr.match(regexData);
 
     if (!match) {
-        exibirMensagemStatus("ERRO: Formato da Data de Nascimento inválido. Use DD/MM/AAAA ou DD-MM-AAAA.", 'erro');
+        exibirMensagemStatus(`ERRO: Formato da ${fieldLabel} inválido. Use DD/MM/AAAA.`, 'erro');
         return false;
     }
 
     const dia = parseInt(match[1], 10);
-    const mes = parseInt(match[2], 10); // Mês (1-12)
+    const mes = parseInt(match[2], 10);
     const ano = parseInt(match[3], 10);
 
-    if (ano < 1900 || ano > new Date().getFullYear()) {
-        exibirMensagemStatus("ERRO: Ano de Nascimento inválido.", 'erro');
+    if (ano < 1900 || ano > new Date().getFullYear() + 10) { 
+        exibirMensagemStatus(`ERRO: Ano da ${fieldLabel} inválido.`, 'erro');
         return false;
     }
     if (mes < 1 || mes > 12) {
-        exibirMensagemStatus("ERRO: Mês de Nascimento inválido.", 'erro');
+        exibirMensagemStatus(`ERRO: Mês da ${fieldLabel} inválido.`, 'erro');
         return false;
     }
-    // Para Date(), o mês é 0-indexado (0 para Janeiro, 11 para Dezembro)
-    // Usar new Date(ano, mes, 0).getDate() retorna o último dia do mês anterior ao 'mes' (1-indexed)
-    // Ex: para mes = 1 (Janeiro), new Date(ano, 1, 0) é o último dia de Janeiro.
-    // Ex: para mes = 12 (Dezembro), new Date(ano, 12, 0) é o último dia de Dezembro.
     const diasNoMes = new Date(ano, mes, 0).getDate();
     if (dia < 1 || dia > diasNoMes) {
-        exibirMensagemStatus("ERRO: Dia de Nascimento inválido para o mês/ano.", 'erro');
+        exibirMensagemStatus(`ERRO: Dia da ${fieldLabel} inválido para o mês/ano.`, 'erro');
         return false;
     }
     return true;
@@ -63,9 +57,18 @@ function validarDataNascimento(dataStr) {
 
 
 async function chamarCloudFunctionGerarDocumento() {
-    exibirMensagemStatus('Iniciando processo de geração de documentos...', 'info', true); 
+    exibirMensagemStatus('Iniciando processo de geração de documentos...', 'info', true);
 
     exibirMensagemStatus('Verificando dados inseridos...', 'info');
+
+    const pacDataNascEl = document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento);
+    if (!pacDataNascEl || !pacDataNascEl.value.trim()) {
+        exibirMensagemStatus("ERRO: Data de Nascimento é obrigatória.", 'erro'); return;
+    }
+    if (!validarData(pacDataNascEl.value, "Data de Nascimento")) {
+        return;
+    }
+
     const dadosForm = coletarDadosDoFormulario();
 
     if (!dadosForm.medico.id) {
@@ -74,16 +77,28 @@ async function chamarCloudFunctionGerarDocumento() {
     if (!dadosForm.paciente.nome_social) {
         exibirMensagemStatus("ERRO: Por favor, preencha o Nome do Paciente.", 'erro'); return;
     }
-    if (!validarDataNascimento(document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento)?.value)) {
-        return;
-    }
      if (!dadosForm.servico.tipo) {
         exibirMensagemStatus("ERRO: Por favor, selecione o Tipo de Serviço.", 'erro'); return;
     }
 
+    const camposServico = CAMPOS_DINAMICOS_POR_SERVICO[dadosForm.servico.tipo] || [];
+    for (const campoCfg of camposServico) {
+        if (campoCfg.isDateInput && campoCfg.tipo === 'text') {
+            const el = document.getElementById(campoCfg.id);
+            if (el && el.value.trim() && !validarData(el.value, campoCfg.label.replace(":", ""))) {
+                return; 
+            }
+        }
+    }
 
-    if (dadosForm.servico.tipo === "Marcapassos" && !dadosForm.campos_dinamicos.cirurgia_proposta) {
-        exibirMensagemStatus("ERRO: Por favor, selecione a Cirurgia Proposta para Marcapassos.", 'erro'); return;
+
+    if (dadosForm.servico.tipo === "Marcapassos") {
+        if (!dadosForm.campos_dinamicos.cirurgia_proposta_aviso) { 
+            exibirMensagemStatus("ERRO: Por favor, selecione a Cirurgia Proposta para Marcapassos.", 'erro'); return;
+        }
+        if (!dadosForm.campos_dinamicos.codigo_cid || !dadosForm.campos_dinamicos.diagnostico) { 
+            exibirMensagemStatus("ERRO: Por favor, selecione o CID para Marcapassos.", 'erro'); return;
+        }
     }
     if (dadosForm.servico.tipo === "Eletrofisiologia") {
         if (!dadosForm.campos_dinamicos.cirurgia_proposta) {
@@ -150,6 +165,8 @@ async function chamarCloudFunctionGerarDocumento() {
         exibirMensagemStatus(`Erro de comunicação com o servidor: ${error.message}`, 'erro');
     } finally {
         document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento).disabled = false;
+        limparFormularioCompleto();
+        // Removida a mensagem "Formulário limpo após tentativa de geração."
     }
 }
 
@@ -194,7 +211,7 @@ if (document.readyState === 'loading') {
 // --- Test Function and Helpers ---
 
 function getRandomElement(arr) {
-    if (!arr || arr.length === 0) return "";
+    if (!arr || arr.length === 0) return null; 
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -221,7 +238,7 @@ function getRandomDate(start, end) {
     const dia = String(date.getDate()).padStart(2, '0');
     const mes = String(date.getMonth() + 1).padStart(2, '0');
     const ano = date.getFullYear();
-    return `${dia}/${mes}/${ano}`;
+    return `${dia}/${mes}/${ano}`; 
 }
 
 
@@ -244,32 +261,37 @@ const sobrenomes = ["Silva", "Santos", "Oliveira", "Costa", "Pereira", "Rodrigue
 
 async function preencherFormularioParaTeste(servicoDesejado) {
     console.log(`Iniciando preenchimento de teste para o serviço: ${servicoDesejado}`);
-    limparFormularioCompleto();
+    limparFormularioCompleto(); 
 
     const selectMedicoEl = document.getElementById(FORM_ELEMENT_IDS.selectMedico);
     if (selectMedicoEl && MEDICOS.length > 0) {
         const medicoAleatorio = getRandomElement(MEDICOS);
-        selectMedicoEl.value = medicoAleatorio.id;
-        salvarMedicoSelecionado(CHAVE_MEDICO_SELECIONADO);
+        if (medicoAleatorio) {
+            selectMedicoEl.value = medicoAleatorio.id;
+            salvarMedicoSelecionado(CHAVE_MEDICO_SELECIONADO);
+        }
     }
 
     document.getElementById(FORM_ELEMENT_IDS.pacProntuario).value = getRandomNumberString(7);
-    document.getElementById(FORM_ELEMENT_IDS.pacNomeSocial).value = getRandomElement(nomesProprios);
-    document.getElementById(FORM_ELEMENT_IDS.pacSexo).value = getRandomElement(["Masculino", "Feminino", "Outro"]);
-    document.getElementById(FORM_ELEMENT_IDS.pacNomeMae).value = getRandomElement(nomesProprios).split(" ")[0] + " " + getRandomElement(sobrenomes);
-    document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento).value = getRandomDate(new Date(1950, 0, 1), new Date(2005, 11, 31));
+    document.getElementById(FORM_ELEMENT_IDS.pacNomeSocial).value = getRandomElement(nomesProprios) || "Nome Teste";
+    const sexoSelect = document.getElementById(FORM_ELEMENT_IDS.pacSexo);
+    const sexoOptions = Array.from(sexoSelect.options).filter(opt => opt.value !== "");
+    if (sexoOptions.length > 0) sexoSelect.value = getRandomElement(sexoOptions).value;
+
+    document.getElementById(FORM_ELEMENT_IDS.pacNomeMae).value = (getRandomElement(nomesProprios) || "Mae Teste").split(" ")[0] + " " + (getRandomElement(sobrenomes) || "SobrenomeMae");
+    document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento).value = getRandomDate(new Date(1950, 0, 1), new Date(2005, 11, 31)); 
     document.getElementById(FORM_ELEMENT_IDS.pacCartaoSUS).value = getRandomNumberString(15);
 
     const selectServicoTipoEl = document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo);
     if (selectServicoTipoEl) {
         selectServicoTipoEl.value = servicoDesejado;
-        atualizarCamposPersonalizados();
+        atualizarCamposPersonalizados(); 
     } else {
         console.error("Elemento selectServicoTipo não encontrado.");
         return;
     }
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     const camposParaServico = CAMPOS_DINAMICOS_POR_SERVICO[servicoDesejado];
     if (camposParaServico && camposParaServico.length > 0) {
@@ -280,33 +302,33 @@ async function preencherFormularioParaTeste(servicoDesejado) {
                     case "textarea":
                         el.value = getRandomLorem(10 + Math.floor(Math.random() * 20));
                         break;
-                    case "date":
-                        const randomDateObj = new Date(new Date(2024, 0, 1).getTime() + Math.random() * (new Date(2025, 11, 31).getTime() - new Date(2024, 0, 1).getTime()));
-                        el.value = randomDateObj.toISOString().split('T')[0];
-                        break;
-                    case "text":
-                        el.value = "Valor de Teste " + getRandomString(8);
+                    case "text": 
+                        if (campoConfig.isDateInput) {
+                            el.value = getRandomDate(new Date(2023, 0, 1), new Date(2025, 11, 31)); 
+                        } else {
+                            el.value = "Valor de Teste " + getRandomString(8);
+                        }
                         break;
                     case "select":
-                        const options = el.querySelectorAll('option');
-                        if (options.length > 1) {
-                            const randomIndex = Math.floor(Math.random() * (options.length -1)) + 1;
-                            el.value = options[randomIndex].value;
-                        } else if (options.length === 1 && options[0].value !== "") {
-                            el.value = options[0].value;
+                        const validOptions = Array.from(el.options).filter(opt => opt.value !== "");
+                        if (validOptions.length > 0) {
+                            const randomOption = getRandomElement(validOptions);
+                            if (randomOption) el.value = randomOption.value;
                         }
                         break;
                 }
             } else if (campoConfig.tipo === "cid_custom_select") {
                 if (cidDataGlobal && cidDataGlobal.length > 0) {
                     const randomCID = getRandomElement(cidDataGlobal);
-                    const triggerInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomTriggerSuffix);
-                    const hiddenCodeInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenCodeSuffix);
-                    const hiddenDescriptionInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenDescriptionSuffix);
+                    if (randomCID) {
+                        const triggerInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomTriggerSuffix);
+                        const hiddenCodeInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenCodeSuffix);
+                        const hiddenDescriptionInput = document.getElementById(campoConfig.id + FORM_ELEMENT_IDS.cidCustomHiddenDescriptionSuffix);
 
-                    if (triggerInput) triggerInput.value = `${randomCID.code} - ${randomCID.description}`;
-                    if (hiddenCodeInput) hiddenCodeInput.value = randomCID.code;
-                    if (hiddenDescriptionInput) hiddenDescriptionInput.value = randomCID.description;
+                        if (triggerInput) triggerInput.value = `${randomCID.code} - ${randomCID.description}`;
+                        if (hiddenCodeInput) hiddenCodeInput.value = randomCID.code;
+                        if (hiddenDescriptionInput) hiddenDescriptionInput.value = randomCID.description;
+                    }
                 }
             }
         });

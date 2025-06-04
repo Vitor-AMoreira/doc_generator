@@ -96,13 +96,13 @@ export const OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA = [
 export const OPCOES_CIRURGIA_PROPOSTA_CIRURGIA_CARDIACA = [
     {
         value: "0211020010_CCE",
-        display: "CATETERISMO CARDIACO ESQUERDO (PRIORIZAÇÃO)",
+        display: "CATETERISMO CARDIACO ESQUERDO",
         tuss: "0211020010",
         fullOriginalString: "0211020010;CATETERISMO CARDIACO ESQUERDO (CATETERISMO CARDIACO ESQUERDO)"
     },
     {
         value: "0211020010_CCD",
-        display: "CATETERISMO CARDIACO DIREITO (PRIORIZAÇÃO)",
+        display: "CATETERISMO CARDIACO DIREITO",
         tuss: "0211020010",
         fullOriginalString: "0211020010;CATETERISMO CARDIACO DIREITO (CATETERISMO CARDIACO DIREITO)"
     },
@@ -120,21 +120,24 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cirurgia_aviso_eletivo_mp",
             label: "Data da Cirurgia:",
-            tipo: "date",
+            tipo: "text", 
+            isDateInput: true, 
+            placeholder: "dd/mm/yyyy",
             placeholder_template: "data_cirurgia"
         },
         {
-            id: "diagnostico_aviso_eletivo_mp",
-            label: "Diagnóstico (Marcapasso):",
-            tipo: "text",
-            placeholder_template: "diagnostico"
+            id: "cid_selecionado_mp",
+            label: "CID (Marcapasso):",
+            tipo: "cid_custom_select",
+            placeholder_template_codigo: "codigo_cid",
+            placeholder_template_descricao: "diagnostico"
         },
         {
             id: "cirurgia_proposta_aviso_eletivo_mp",
             label: "Cirurgia Proposta:",
             tipo: "select",
             opcoes_dropdown: OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO,
-            placeholder_template: "cirurgia_proposta"
+            placeholder_template: "cirurgia_proposta_aviso"
         },
         {
             id: "cirurgiao_aviso_eletivo_mp",
@@ -155,14 +158,23 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cirurgia_aviso_eletivo_cc",
             label: "Data da Cirurgia (Aviso Eletivo):",
-            tipo: "date",
-            placeholder_template: "data_cirurgia_aviso"
+            tipo: "text", 
+            isDateInput: true,
+            placeholder: "dd/mm/yyyy",
+            placeholder_template: "data_cirurgia"
         },
-        {
+        { // Campo CID adicionado para Cirurgia Cardíaca
+            id: "cid_selecionado_cc",
+            label: "CID (Cirurgia Cardíaca):",
+            tipo: "cid_custom_select",
+            placeholder_template_codigo: "codigo_cid",
+            placeholder_template_descricao: "descricao_cid"
+        },
+        { // Mantido para diagnóstico textual, se necessário, ou pode ser sobreposto pela descrição do CID se o template usar 'diagnostico'
             id: "diagnostico_aviso_eletivo_cc",
-            label: "Diagnóstico:",
+            label: "Diagnóstico (texto):", // Label pode ser ajustada se CID for primário
             tipo: "text",
-            placeholder_template: "diagnostico"
+            placeholder_template: "diagnostico" // Placeholder ajustado para evitar conflito se CID usar "diagnostico"
         },
         {
             id: "cirurgia_proposta_priorizacao_cc",
@@ -180,7 +192,9 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cateterismo_cc",
             label: "Data do Cateterismo (Aviso Hemodinâmica):",
-            tipo: "date",
+            tipo: "text", 
+            isDateInput: true,
+            placeholder: "dd/mm/yyyy",
             placeholder_template: "data_cateterismo"
         },
         {
@@ -197,12 +211,14 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             id: "detalhes_priorizacao_ef",
             label: "Condição Clínica:",
             tipo: "textarea",
-            placeholder_template: "condicao_clinica" // Alterado de "campo_personalizado"
+            placeholder_template: "condicao_clinica"
         },
         {
             id: "data_cirurgia_aviso_eletivo_ef",
             label: "Data da Cirurgia:",
-            tipo: "date",
+            tipo: "text", 
+            isDateInput: true,
+            placeholder: "dd/mm/yyyy",
             placeholder_template: "data_cirurgia"
         },
         {
