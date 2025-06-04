@@ -336,9 +336,9 @@ export function coletarDadosDoFormulario() {
                     } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "cirurgia_proposta_aviso_texto_cc") {
                         dados.campos_dinamicos[campoConfig.placeholder_template] = value;
                     } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "data_cateterismo_cc") {
-                        dados.campos_dinamicos[campoConfig.placeholder_template] = value; // Envia YYYY-MM-DD
+                        dados.campos_dinamicos[campoConfig.placeholder_template] = value; 
                     } else if (tipoServicoSelecionado === "Cirurgia Cardíaca" && campoConfig.id === "data_cirurgia_aviso_eletivo_cc"){
-                        dados.campos_dinamicos[campoConfig.placeholder_template] = value; // Envia YYYY-MM-DD
+                        dados.campos_dinamicos[campoConfig.placeholder_template] = value; 
                     }else if (tipoServicoSelecionado === "Marcapassos" && campoConfig.id === "cirurgia_proposta_aviso_eletivo_mp") {
                         const selectedCirurgiaId = value;
                         const cirurgiaSelecionadaObj = OPCOES_CIRURGIA_PROPOSTA_MARCAPASSO.find(c => c.id === selectedCirurgiaId);
@@ -357,7 +357,7 @@ export function coletarDadosDoFormulario() {
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = "";
                         }
-                    } else if (campoConfig.tipo === "select" && campoConfig.placeholder_template_nome && campoConfig.placeholder_template_crm) { // Cirurgião
+                    } else if (campoConfig.tipo === "select" && campoConfig.placeholder_template_nome && campoConfig.placeholder_template_crm) { 
                         const selectedCirurgiaoId = value;
                         const cirurgiaoObj = CIRURGIOES.find(c => c.id === selectedCirurgiaoId);
                         if (cirurgiaoObj) {
@@ -374,16 +374,18 @@ export function coletarDadosDoFormulario() {
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = value;
                         }
-                    } else { // Caso genérico para campos que não têm placeholder_template direto (raro)
+                    } else { 
                         dados.campos_dinamicos[campoConfig.id] = value;
                     }
                 }
             }
         });
     }
-    // Adiciona campo 'diagnostico' para Eletrofisiologia, copiando de 'condicao_clinica' (que usa placeholder 'campo_personalizado')
-    if (tipoServicoSelecionado === "Eletrofisiologia" && dados.campos_dinamicos.campo_personalizado) {
-        dados.campos_dinamicos.diagnostico = dados.campos_dinamicos.campo_personalizado;
+    
+    if (tipoServicoSelecionado === "Eletrofisiologia") {
+        // 'condicao_clinica' (anteriormente 'campo_personalizado') é o placeholder para "Condição Clínica" de Eletrofisiologia
+        // Garante que 'diagnostico' reflita esse valor, mesmo se vazio.
+        dados.campos_dinamicos.diagnostico = dados.campos_dinamicos.condicao_clinica || "";
     }
 
 
@@ -470,7 +472,6 @@ export function limparFormularioCompleto() {
         }
     });
     
-    // Limpa as mensagens de status, exceto a de formulário limpo.
     if (DOMElements.statusMessages) {
         const mensagens = DOMElements.statusMessages.querySelectorAll('p');
         mensagens.forEach(msg => {

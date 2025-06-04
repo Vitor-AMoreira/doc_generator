@@ -23,32 +23,39 @@ import {
     cidDataGlobal
 } from './ui.js';
 
-
-function validarFormatoData(dataStr, nomeCampo) {
-    if (!dataStr.trim()) return true; // Permite campos de data opcionais não preenchidos
-    const regexData = /^(\d{2})\/(\d{2})\/(\d{4})$/; // Estritamente DD/MM/YYYY
+function validarDataNascimento(dataStr) {
+    if (!dataStr.trim()) {
+        exibirMensagemStatus("ERRO: Data de Nascimento é obrigatória.", 'erro');
+        return false;
+    }
+    // Tenta validar formatos DD/MM/YYYY e DD-MM-YYYY, permitindo 1 ou 2 dígitos para dia/mês
+    const regexData = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/;
     const match = dataStr.match(regexData);
 
     if (!match) {
-        exibirMensagemStatus(`ERRO: Formato da ${nomeCampo} inválido. Use dia/mês/ano.`, 'erro');
+        exibirMensagemStatus("ERRO: Formato da Data de Nascimento inválido. Use DD/MM/AAAA ou DD-MM-AAAA.", 'erro');
         return false;
     }
 
     const dia = parseInt(match[1], 10);
-    const mes = parseInt(match[2], 10);
+    const mes = parseInt(match[2], 10); // Mês (1-12)
     const ano = parseInt(match[3], 10);
 
-    if (ano < 1900 || ano > new Date().getFullYear() + 5) { // Permite algum buffer para datas futuras
-        exibirMensagemStatus(`ERRO: Ano da ${nomeCampo} inválido.`, 'erro');
+    if (ano < 1900 || ano > new Date().getFullYear()) {
+        exibirMensagemStatus("ERRO: Ano de Nascimento inválido.", 'erro');
         return false;
     }
     if (mes < 1 || mes > 12) {
-        exibirMensagemStatus(`ERRO: Mês da ${nomeCampo} inválido.`, 'erro');
+        exibirMensagemStatus("ERRO: Mês de Nascimento inválido.", 'erro');
         return false;
     }
+    // Para Date(), o mês é 0-indexado (0 para Janeiro, 11 para Dezembro)
+    // Usar new Date(ano, mes, 0).getDate() retorna o último dia do mês anterior ao 'mes' (1-indexed)
+    // Ex: para mes = 1 (Janeiro), new Date(ano, 1, 0) é o último dia de Janeiro.
+    // Ex: para mes = 12 (Dezembro), new Date(ano, 12, 0) é o último dia de Dezembro.
     const diasNoMes = new Date(ano, mes, 0).getDate();
     if (dia < 1 || dia > diasNoMes) {
-        exibirMensagemStatus(`ERRO: Dia da ${nomeCampo} inválido para o mês/ano.`, 'erro');
+        exibirMensagemStatus("ERRO: Dia de Nascimento inválido para o mês/ano.", 'erro');
         return false;
     }
     return true;
@@ -56,39 +63,22 @@ function validarFormatoData(dataStr, nomeCampo) {
 
 
 async function chamarCloudFunctionGerarDocumento() {
-    exibirMensagemStatus('Iniciando processo de geração de documentos...', 'info', true);
+    exibirMensagemStatus('Iniciando processo de geração de documentos...', 'info', true); 
 
     exibirMensagemStatus('Verificando dados inseridos...', 'info');
-    const dadosForm = coletarDadosDoFormulario(); // Dados já são coletados no formato DD/MM/YYYY onde aplicável
+    const dadosForm = coletarDadosDoFormulario();
 
-    // Validações
     if (!dadosForm.medico.id) {
         exibirMensagemStatus("ERRO: Por favor, selecione um médico solicitante.", 'erro'); return;
     }
     if (!dadosForm.paciente.nome_social) {
         exibirMensagemStatus("ERRO: Por favor, preencha o Nome do Paciente.", 'erro'); return;
     }
-    if (!document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento)?.value.trim()) {
-         exibirMensagemStatus("ERRO: Data de Nascimento é obrigatória.", 'erro');
-         return;
-    }
-    if (!validarFormatoData(dadosForm.paciente.data_nascimento, "Data de Nascimento")) {
+    if (!validarDataNascimento(document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento)?.value)) {
         return;
     }
-    if (!dadosForm.servico.tipo) {
+     if (!dadosForm.servico.tipo) {
         exibirMensagemStatus("ERRO: Por favor, selecione o Tipo de Serviço.", 'erro'); return;
-    }
-
-    // Validar outras datas dinâmicas
-    const camposServicoAtual = CAMPOS_DINAMICOS_POR_SERVICO[dadosForm.servico.tipo] || [];
-    for (const campo of camposServicoAtual) {
-        if (campo.tipo === "text" && campo.label.toLowerCase().includes("data")) { // Assumindo que campos de data em texto têm "data" no label
-            const valorCampoData = document.getElementById(campo.id)?.value;
-            if (valorCampoData && !validarFormatoData(valorCampoData, campo.label)) return;
-        } else if (campo.tipo === "date") { // Para campos <input type="date">, o valor já foi formatado para DD/MM/YYYY em coletarDadosDoFormulario
-             const valorCampoData = dadosForm.campos_dinamicos[campo.placeholder_template]; // Acessa o valor já formatado
-             if (valorCampoData && !validarFormatoData(valorCampoData, campo.label)) return;
-        }
     }
 
 
@@ -120,6 +110,7 @@ async function chamarCloudFunctionGerarDocumento() {
     }
     exibirMensagemStatus('Solicitação enviada ao servidor. Processando...', 'info');
     document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento).disabled = true;
+
 
     try {
         const response = await fetch(CLOUD_FUNCTION_URL, {
@@ -159,8 +150,6 @@ async function chamarCloudFunctionGerarDocumento() {
         exibirMensagemStatus(`Erro de comunicação com o servidor: ${error.message}`, 'erro');
     } finally {
         document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento).disabled = false;
-        limparFormularioCompleto(); // Limpa o formulário após a tentativa de gerar
-        exibirMensagemStatus("Formulário limpo após a operação. Pronto para nova entrada.", "info");
     }
 }
 
@@ -178,6 +167,11 @@ function setupEventListeners() {
     const btnGerar = document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento);
     if (btnGerar) {
         btnGerar.addEventListener('click', chamarCloudFunctionGerarDocumento);
+    }
+
+    const btnLimpar = document.getElementById(FORM_ELEMENT_IDS.btnLimparFormulario);
+    if(btnLimpar) {
+        btnLimpar.addEventListener('click', limparFormularioCompleto);
     }
 }
 
@@ -222,7 +216,7 @@ function getRandomNumberString(length) {
     return result;
 }
 
-function getRandomDateForTest(start, end) {
+function getRandomDate(start, end) {
     const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
     const dia = String(date.getDate()).padStart(2, '0');
     const mes = String(date.getMonth() + 1).padStart(2, '0');
@@ -263,7 +257,7 @@ async function preencherFormularioParaTeste(servicoDesejado) {
     document.getElementById(FORM_ELEMENT_IDS.pacNomeSocial).value = getRandomElement(nomesProprios);
     document.getElementById(FORM_ELEMENT_IDS.pacSexo).value = getRandomElement(["Masculino", "Feminino", "Outro"]);
     document.getElementById(FORM_ELEMENT_IDS.pacNomeMae).value = getRandomElement(nomesProprios).split(" ")[0] + " " + getRandomElement(sobrenomes);
-    document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento).value = getRandomDateForTest(new Date(1950, 0, 1), new Date(2005, 11, 31));
+    document.getElementById(FORM_ELEMENT_IDS.pacDataNascimento).value = getRandomDate(new Date(1950, 0, 1), new Date(2005, 11, 31));
     document.getElementById(FORM_ELEMENT_IDS.pacCartaoSUS).value = getRandomNumberString(15);
 
     const selectServicoTipoEl = document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo);
@@ -286,16 +280,12 @@ async function preencherFormularioParaTeste(servicoDesejado) {
                     case "textarea":
                         el.value = getRandomLorem(10 + Math.floor(Math.random() * 20));
                         break;
-                    case "date": // Mantido como date, mas a coleta tratará
+                    case "date":
                         const randomDateObj = new Date(new Date(2024, 0, 1).getTime() + Math.random() * (new Date(2025, 11, 31).getTime() - new Date(2024, 0, 1).getTime()));
-                        el.value = randomDateObj.toISOString().split('T')[0]; // Formato YYYY-MM-DD para o input date
+                        el.value = randomDateObj.toISOString().split('T')[0];
                         break;
                     case "text":
-                         if (campoConfig.label.toLowerCase().includes("data")){ // para os campos de data que são text
-                            el.value = getRandomDateForTest(new Date(2024,0,1), new Date(2025,11,31));
-                         } else {
-                            el.value = "Valor de Teste " + getRandomString(8);
-                         }
+                        el.value = "Valor de Teste " + getRandomString(8);
                         break;
                     case "select":
                         const options = el.querySelectorAll('option');

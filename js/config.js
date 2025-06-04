@@ -120,7 +120,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cirurgia_aviso_eletivo_mp",
             label: "Data da Cirurgia:",
-            tipo: "text", // Alterado para text para consistência de formato
+            tipo: "date",
             placeholder_template: "data_cirurgia"
         },
         {
@@ -155,7 +155,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cirurgia_aviso_eletivo_cc",
             label: "Data da Cirurgia (Aviso Eletivo):",
-            tipo: "text", // Alterado para text
+            tipo: "date",
             placeholder_template: "data_cirurgia_aviso"
         },
         {
@@ -180,7 +180,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cateterismo_cc",
             label: "Data do Cateterismo (Aviso Hemodinâmica):",
-            tipo: "text", // Alterado para text
+            tipo: "date",
             placeholder_template: "data_cateterismo"
         },
         {
@@ -197,12 +197,12 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
             id: "detalhes_priorizacao_ef",
             label: "Condição Clínica:",
             tipo: "textarea",
-            placeholder_template: "condicao_clinica"
+            placeholder_template: "condicao_clinica" // Alterado de "campo_personalizado"
         },
         {
             id: "data_cirurgia_aviso_eletivo_ef",
             label: "Data da Cirurgia:",
-            tipo: "text", // Alterado para text
+            tipo: "date",
             placeholder_template: "data_cirurgia"
         },
         {
@@ -235,6 +235,7 @@ export const FORM_ELEMENT_IDS = {
     selectServicoTipo: "servicoTipo",
     containerCamposPersonalizados: "camposPersonalizadosContainer",
     btnGerarUploadDocumento: "btnGerarUploadDocumento",
+    btnLimparFormulario: "btnLimparFormulario",
     pacProntuario: "pacProntuario",
     pacNomeSocial: "pacNomeSocial",
     pacSexo: "pacSexo",
