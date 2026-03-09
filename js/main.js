@@ -20,7 +20,10 @@ import {
     exibirLinkDocumento,
     limparFormularioCompleto,
     carregarDadosCID,
-    cidDataGlobal
+    cidDataGlobal,
+    getDOMElements,
+    renderizarListaMedicosModal,
+    adicionarNovoMedico
 } from './ui.js';
 
 function validarData(dataStr, fieldLabel = "Data") {
@@ -77,7 +80,7 @@ async function chamarCloudFunctionGerarDocumento() {
     if (!dadosForm.paciente.nome_social) {
         exibirMensagemStatus("ERRO: Por favor, preencha o Nome do Paciente.", 'erro'); return;
     }
-     if (!dadosForm.servico.tipo) {
+    if (!dadosForm.servico.tipo) {
         exibirMensagemStatus("ERRO: Por favor, selecione o Tipo de Serviço.", 'erro'); return;
     }
 
@@ -154,7 +157,7 @@ async function chamarCloudFunctionGerarDocumento() {
                 exibirMensagemStatus(`Geração de documentos finalizada!`, 'sucesso');
                 exibirLinkDocumento('Acesse a pasta com todos os documentos aqui', responseData.link_pasta_documento);
             } else if (!responseData.links_documentos || responseData.links_documentos.length === 0) {
-                 exibirMensagemStatus('Nenhum documento foi gerado, ou link da pasta não retornado.', 'aviso');
+                exibirMensagemStatus('Nenhum documento foi gerado, ou link da pasta não retornado.', 'aviso');
             }
 
         } else {
@@ -170,24 +173,47 @@ async function chamarCloudFunctionGerarDocumento() {
 }
 
 function setupEventListeners() {
-    const selectMedicoEl = document.getElementById(FORM_ELEMENT_IDS.selectMedico);
-    if (selectMedicoEl) {
-        selectMedicoEl.addEventListener('change', () => salvarMedicoSelecionado(CHAVE_MEDICO_SELECIONADO));
+    const DOM = getDOMElements();
+
+    if (DOM.selectMedico) {
+        DOM.selectMedico.addEventListener('change', () => salvarMedicoSelecionado(CHAVE_MEDICO_SELECIONADO));
     }
 
-    const selectServicoTipoEl = document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo);
-    if (selectServicoTipoEl) {
-        selectServicoTipoEl.addEventListener('change', atualizarCamposPersonalizados);
+    if (DOM.selectServicoTipo) {
+        DOM.selectServicoTipo.addEventListener('change', atualizarCamposPersonalizados);
     }
 
-    const btnGerar = document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento);
-    if (btnGerar) {
-        btnGerar.addEventListener('click', chamarCloudFunctionGerarDocumento);
+    if (DOM.medicalDocForm) {
+        const btnGerar = document.getElementById(FORM_ELEMENT_IDS.btnGerarUploadDocumento);
+        if (btnGerar) btnGerar.addEventListener('click', chamarCloudFunctionGerarDocumento);
     }
 
     const btnLimpar = document.getElementById(FORM_ELEMENT_IDS.btnLimparFormulario);
-    if(btnLimpar) {
+    if (btnLimpar) {
         btnLimpar.addEventListener('click', limparFormularioCompleto);
+    }
+
+    if (DOM.btnGerenciarMedicos) {
+        DOM.btnGerenciarMedicos.addEventListener('click', () => {
+            renderizarListaMedicosModal();
+            DOM.modalMedicos.style.display = 'block';
+        });
+    }
+
+    if (DOM.closeModalMedicos) {
+        DOM.closeModalMedicos.addEventListener('click', () => {
+            DOM.modalMedicos.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target === DOM.modalMedicos) {
+            DOM.modalMedicos.style.display = 'none';
+        }
+    });
+
+    if (DOM.btnAdicionarMedico) {
+        DOM.btnAdicionarMedico.addEventListener('click', adicionarNovoMedico);
     }
 }
 

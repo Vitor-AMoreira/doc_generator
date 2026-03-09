@@ -19,6 +19,7 @@
                         <select id="selectMedico" name="selectMedico">
                             <option value="">Selecione um médico...</option>
                         </select>
+                        <button type="button" id="btnGerenciarMedicos" class="secondary-button">Gerenciar Médicos</button>
                     </div>
                 </fieldset>
 
@@ -107,6 +108,34 @@
             <h2>Status da Operação</h2>
             <div id="statusMessages">
                 </div>
+        </div>
+    </div>
+
+    <!-- Modal Gerenciar Médicos -->
+    <div id="modalMedicos" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalMedicos">&times;</span>
+            <h2>Gerenciar Médicos</h2>
+            <div id="listaMedicosContainer">
+                <ul id="listaMedicosUl" class="medical-list"></ul>
+            </div>
+            
+            <h3 style="margin-top: 20px;">Adicionar Novo Médico</h3>
+            <div class="form-grid" style="margin-bottom: 0;">
+                <div class="form-group">
+                    <label for="novoMedicoNome">Nome:</label>
+                    <input type="text" id="novoMedicoNome" placeholder="Nome completo">
+                </div>
+                <div class="form-group">
+                    <label for="novoMedicoCRM">CRM:</label>
+                    <input type="text" id="novoMedicoCRM" placeholder="Sem letras, exp: 31548">
+                </div>
+                <div class="form-group">
+                    <label for="novoMedicoCPF">CPF:</label>
+                    <input type="text" id="novoMedicoCPF" placeholder="Apenas números">
+                </div>
+            </div>
+            <button type="button" id="btnAdicionarMedico" class="primary-button" style="margin-top: 15px;">Adicionar Médico</button>
         </div>
     </div>
 

@@ -1,6 +1,7 @@
 // js/ui.js
 import {
     MEDICOS,
+    salvarListaMedicos,
     CAMPOS_DINAMICOS_POR_SERVICO,
     FORM_ELEMENT_IDS,
     OPCOES_CIRURGIA_PROPOSTA_ELETROFISIOLOGIA,
@@ -24,8 +25,20 @@ const DOMElements = {
     selectServicoTipo: document.getElementById(FORM_ELEMENT_IDS.selectServicoTipo),
     containerCamposPersonalizados: document.getElementById(FORM_ELEMENT_IDS.containerCamposPersonalizados),
     statusMessages: document.getElementById(FORM_ELEMENT_IDS.statusMessages),
-    medicalDocForm: document.getElementById('medicalDocForm')
+    medicalDocForm: document.getElementById('medicalDocForm'),
+    btnGerenciarMedicos: document.getElementById(FORM_ELEMENT_IDS.btnGerenciarMedicos),
+    modalMedicos: document.getElementById(FORM_ELEMENT_IDS.modalMedicos),
+    closeModalMedicos: document.getElementById(FORM_ELEMENT_IDS.closeModalMedicos),
+    listaMedicosUl: document.getElementById(FORM_ELEMENT_IDS.listaMedicosUl),
+    novoMedicoNome: document.getElementById(FORM_ELEMENT_IDS.novoMedicoNome),
+    novoMedicoCRM: document.getElementById(FORM_ELEMENT_IDS.novoMedicoCRM),
+    novoMedicoCPF: document.getElementById(FORM_ELEMENT_IDS.novoMedicoCPF),
+    btnAdicionarMedico: document.getElementById(FORM_ELEMENT_IDS.btnAdicionarMedico)
 };
+
+export function getDOMElements() {
+    return DOMElements;
+}
 
 export async function carregarDadosCID() {
     try {
@@ -48,7 +61,7 @@ export async function carregarDadosCID() {
 
         console.log("Dados de CID carregados:", cidDataGlobal.length);
         if (cidDataGlobal.length === 0 && lines.length > 1) {
-             exibirMensagemStatus(`Dados de CID parecem vazios ou malformatados.`, 'aviso');
+            exibirMensagemStatus(`Dados de CID parecem vazios ou malformatados.`, 'aviso');
         }
     } catch (error) {
         console.error("Erro ao carregar ou processar o arquivo CID:", error);
@@ -177,6 +190,7 @@ function criarCampoCIDCustomizado(container, campoConfig) {
 
 export function popularDropdownMedicos() {
     if (!DOMElements.selectMedico) return;
+    const valueAntigo = DOMElements.selectMedico.value;
     DOMElements.selectMedico.innerHTML = '<option value="">Selecione um médico...</option>';
     MEDICOS.forEach(medico => {
         const option = document.createElement('option');
@@ -184,6 +198,81 @@ export function popularDropdownMedicos() {
         option.textContent = medico.name;
         DOMElements.selectMedico.appendChild(option);
     });
+    // Tenta restaurar a seleção anterior se esse médico ainda existir
+    if (MEDICOS.find(m => m.id === valueAntigo)) {
+        DOMElements.selectMedico.value = valueAntigo;
+    } else if (valueAntigo) {
+        localStorage.removeItem(CHAVE_MEDICO_SELECIONADO);
+    }
+}
+
+export function renderizarListaMedicosModal() {
+    if (!DOMElements.listaMedicosUl) return;
+    DOMElements.listaMedicosUl.innerHTML = '';
+
+    if (MEDICOS.length === 0) {
+        DOMElements.listaMedicosUl.innerHTML = '<li>Nenhum médico cadastrado.</li>';
+        return;
+    }
+
+    MEDICOS.forEach(medico => {
+        const li = document.createElement('li');
+
+        const divInfo = document.createElement('div');
+        divInfo.className = 'medical-item-info';
+        divInfo.innerHTML = `<strong>${medico.name}</strong><br><small>CRM: ${medico.crm} | CPF: ${medico.cpf}</small>`;
+
+        const divActions = document.createElement('div');
+        divActions.className = 'medical-item-actions';
+
+        const btnRemover = document.createElement('button');
+        btnRemover.textContent = 'Remover';
+        btnRemover.onclick = () => removerMedico(medico.id);
+
+        divActions.appendChild(btnRemover);
+        li.appendChild(divInfo);
+        li.appendChild(divActions);
+
+        DOMElements.listaMedicosUl.appendChild(li);
+    });
+}
+
+function removerMedico(id) {
+    if (confirm("Tem certeza que deseja remover este médico?")) {
+        const novaLista = MEDICOS.filter(m => m.id !== id);
+        salvarListaMedicos(novaLista);
+        popularDropdownMedicos();
+        renderizarListaMedicosModal();
+        exibirMensagemStatus('Médico removido com sucesso.', 'sucesso');
+    }
+}
+
+export function adicionarNovoMedico() {
+    const nome = DOMElements.novoMedicoNome.value.trim();
+    const crm = DOMElements.novoMedicoCRM.value.trim();
+    const cpf = DOMElements.novoMedicoCPF.value.trim();
+
+    if (!nome) {
+        alert("O Nome do médico é obrigatório.");
+        return;
+    }
+
+    const novoId = Date.now().toString(); // ID único baseado no timestamp
+
+    const novaLista = [...MEDICOS, { id: novoId, name: nome, crm: crm, cpf: cpf }];
+    salvarListaMedicos(novaLista);
+
+    // Limpar os campos
+    DOMElements.novoMedicoNome.value = '';
+    DOMElements.novoMedicoCRM.value = '';
+    DOMElements.novoMedicoCPF.value = '';
+
+    popularDropdownMedicos();
+    renderizarListaMedicosModal();
+    DOMElements.selectMedico.value = novoId; // Opção pronta para selecionar
+    salvarMedicoSelecionado(CHAVE_MEDICO_SELECIONADO);
+
+    exibirMensagemStatus(`Médico ${nome} adicionado com sucesso.`, 'sucesso');
 }
 
 export function carregarMedicoSelecionado(chaveStorage) {
@@ -366,13 +455,13 @@ export function coletarDadosDoFormulario() {
                             dados.campos_dinamicos[campoConfig.placeholder_template_nome] = cirurgiaoObj.name;
                             dados.campos_dinamicos[campoConfig.placeholder_template_crm] = cirurgiaoObj.crm;
                         } else {
-                             dados.campos_dinamicos[campoConfig.placeholder_template_nome] = "";
-                             dados.campos_dinamicos[campoConfig.placeholder_template_crm] = "";
+                            dados.campos_dinamicos[campoConfig.placeholder_template_nome] = "";
+                            dados.campos_dinamicos[campoConfig.placeholder_template_crm] = "";
                         }
                     } else if (campoConfig.placeholder_template) {
                         if (inputElement.tagName === 'SELECT') {
-                             const selectedOption = inputElement.options[inputElement.selectedIndex];
-                             dados.campos_dinamicos[campoConfig.placeholder_template] = selectedOption ? selectedOption.text : "";
+                            const selectedOption = inputElement.options[inputElement.selectedIndex];
+                            dados.campos_dinamicos[campoConfig.placeholder_template] = selectedOption ? selectedOption.text : "";
                         } else {
                             dados.campos_dinamicos[campoConfig.placeholder_template] = valueToStore;
                         }
@@ -396,7 +485,7 @@ export function coletarDadosDoFormulario() {
         } else if (dados.campos_dinamicos.cirurgia_proposta && dados.campos_dinamicos.cirurgia_proposta.trim() !== "") {
             dados.campos_dinamicos.procedimento = dados.campos_dinamicos.cirurgia_proposta;
             if (!dados.campos_dinamicos.procedimento_codigo) {
-                 dados.campos_dinamicos.procedimento_codigo = "";
+                dados.campos_dinamicos.procedimento_codigo = "";
             }
         } else {
             dados.campos_dinamicos.procedimento = "";
@@ -460,8 +549,8 @@ export function limparFormularioCompleto() {
     }
     localStorage.removeItem(CHAVE_MEDICO_SELECIONADO);
 
-    if(DOMElements.selectMedico) DOMElements.selectMedico.value = "";
-    if(DOMElements.selectServicoTipo) DOMElements.selectServicoTipo.value = "";
+    if (DOMElements.selectMedico) DOMElements.selectMedico.value = "";
+    if (DOMElements.selectServicoTipo) DOMElements.selectServicoTipo.value = "";
 
     atualizarCamposPersonalizados();
 

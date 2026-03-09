@@ -1,15 +1,29 @@
-// js/config.js
 export const CHAVE_MEDICO_SELECIONADO = 'medicalDocApp_selectedDoctorId_v6';
+export const CHAVE_MEDICOS_LISTA = 'medicalDocApp_medicos_list_v1';
 
 export const CLOUD_FUNCTION_URL = 'https://southamerica-east1-jesus-doc-generator.cloudfunctions.net/doc_generator';
 
 export const CID_CSV_PATH = 'cid.csv';
 export const CIDS_PER_PAGE = 50;
 
-export const MEDICOS = [
-    { id: '1', name: "Matheus Henrique de Jesus Lima", crm: "31548", cpf: "70235523160" },
-    { id: '2', name: "Thaine Inacio Mendonça", crm: "27066", cpf: "70114148198" },
-];
+function carregarMedicosIniciais() {
+    const salvos = localStorage.getItem(CHAVE_MEDICOS_LISTA);
+    if (salvos) {
+        return JSON.parse(salvos);
+    }
+    return [
+        { id: '1', name: "Matheus Henrique de Jesus Lima", crm: "31548", cpf: "70235523160" },
+        { id: '2', name: "Thaine Inacio Mendonça", crm: "27066", cpf: "70114148198" }
+    ];
+}
+
+export const MEDICOS = carregarMedicosIniciais();
+
+export function salvarListaMedicos(novaLista) {
+    MEDICOS.length = 0;
+    MEDICOS.push(...novaLista);
+    localStorage.setItem(CHAVE_MEDICOS_LISTA, JSON.stringify(MEDICOS));
+}
 
 export const CIRURGIOES = [
     { id: 'luiz_antonio', name: "Luiz Antonio", crm: "6873" },
@@ -120,8 +134,8 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cirurgia_aviso_eletivo_mp",
             label: "Data da Cirurgia:",
-            tipo: "text", 
-            isDateInput: true, 
+            tipo: "text",
+            isDateInput: true,
             placeholder: "dd/mm/yyyy",
             placeholder_template: "data_cirurgia"
         },
@@ -158,7 +172,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cirurgia_aviso_eletivo_cc",
             label: "Data da Cirurgia (Aviso Eletivo):",
-            tipo: "text", 
+            tipo: "text",
             isDateInput: true,
             placeholder: "dd/mm/yyyy",
             placeholder_template: "data_cirurgia"
@@ -192,7 +206,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cateterismo_cc",
             label: "Data do Cateterismo (Aviso Hemodinâmica):",
-            tipo: "text", 
+            tipo: "text",
             isDateInput: true,
             placeholder: "dd/mm/yyyy",
             placeholder_template: "data_cateterismo"
@@ -216,7 +230,7 @@ export const CAMPOS_DINAMICOS_POR_SERVICO = {
         {
             id: "data_cirurgia_aviso_eletivo_ef",
             label: "Data da Cirurgia:",
-            tipo: "text", 
+            tipo: "text",
             isDateInput: true,
             placeholder: "dd/mm/yyyy",
             placeholder_template: "data_cirurgia"
@@ -266,5 +280,13 @@ export const FORM_ELEMENT_IDS = {
     cidCustomListSuffix: "_list",
     cidCustomLoadMoreSuffix: "_loadMore",
     cidCustomHiddenCodeSuffix: "_hiddenCode",
-    cidCustomHiddenDescriptionSuffix: "_hiddenDescription"
+    cidCustomHiddenDescriptionSuffix: "_hiddenDescription",
+    btnGerenciarMedicos: "btnGerenciarMedicos",
+    modalMedicos: "modalMedicos",
+    closeModalMedicos: "closeModalMedicos",
+    listaMedicosUl: "listaMedicosUl",
+    novoMedicoNome: "novoMedicoNome",
+    novoMedicoCRM: "novoMedicoCRM",
+    novoMedicoCPF: "novoMedicoCPF",
+    btnAdicionarMedico: "btnAdicionarMedico"
 };
